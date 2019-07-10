@@ -1,4 +1,4 @@
-package com.hamperapp.rx
+package com.hamperapp.actor
 
 import com.hamperapp.log.Logger
 import io.reactivex.BackpressureStrategy

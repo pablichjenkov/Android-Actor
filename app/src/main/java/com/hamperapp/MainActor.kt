@@ -4,31 +4,33 @@ import com.hamperapp.actor.Actor
 import com.hamperapp.auth.AuthPresenterActor
 import com.hamperapp.launch.SplashActor
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 
 
-class MainActor(sendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
-
+class MainActor(
+	private val uiSendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
 ) {
 
 	enum class Stage {
 		Idle,
 		Splash,
-		AuthLogin,
-		AuthRegister,
+		Auth,
 		Home
 	}
 
 	private var stage: Stage = Stage.Idle
 
-	var authActor = HamperApplication.instance.authActor
+	private var authActor = HamperApplication.instance.authActor
 
-	var splashActor = SplashActor(sendChannel, createSplashActorObserverChannel())
+	private var splashActor = SplashActor(uiSendChannel, createSplashActorObserverChannel())
 
-	var authPresenterActor = AuthPresenterActor(authActor = authActor, uiSendChannel = sendChannel)
+	private var authPresenterActor = AuthPresenterActor(
+		authActor = authActor,
+		uiSendChannel = uiSendChannel,
+		observerChannel = createAuthPresenterActorObserverChannel()
+	)
 
 	private val compositeDisposable = CompositeDisposable()
 
@@ -37,29 +39,17 @@ class MainActor(sendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
 
 		when (inMsg) {
 
-			InMsg.OnStart -> {
+			InMsg.OnStart -> { onStart() }
 
-				onStart()
+			InMsg.OnStop -> { onStop() }
 
-			}
-
-			InMsg.OnStop -> {
-
-				onStop()
-
-			}
-
-			InMsg.OnBack -> {
-
-				OnBack()
-
-			}
+			InMsg.OnBack -> { OnBack() }
 
 		}
 
 	}
 
-	private fun createSplashActorObserverChannel() : SendChannel<SplashActor.OutMsg> = scope.actor(Dispatchers.Main) {
+	private fun createSplashActorObserverChannel() : SendChannel<SplashActor.OutMsg> = scope.actor {
 
 		consumeEach { splashMsg ->
 
@@ -67,7 +57,32 @@ class MainActor(sendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
 
 				is SplashActor.OutMsg.OnSplashComplete -> {
 
+					stage = Stage.Auth
+
 					authPresenterActor.send(AuthPresenterActor.InMsg.OnStart)
+
+				}
+
+			}
+
+		}
+
+	}
+
+	private fun createAuthPresenterActorObserverChannel() : SendChannel<AuthPresenterActor.OutMsg> = scope.actor {
+
+		consumeEach { authPMsg ->
+
+			when (authPMsg) {
+
+				is AuthPresenterActor.OutMsg.AuthSuccess -> {
+
+
+				}
+
+				is AuthPresenterActor.OutMsg.AuthError -> {
+
+					uiSendChannel.send(UIActorMsg.BackResult(false))
 
 				}
 
@@ -90,18 +105,11 @@ class MainActor(sendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
 			}
 
 			Stage.Splash -> {
-
-
+				// Let SplashFragment.onStart() propagate this event to SplashActor()
 			}
 
-			Stage.AuthLogin -> {
-
-
-			}
-
-			Stage.AuthRegister -> {
-
-
+			Stage.Auth -> {
+				// Let AuthFragments.onStart() propagate this event to AuthPresenterActor()
 			}
 
 			Stage.Home -> {
@@ -120,7 +128,33 @@ class MainActor(sendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
 
 	private fun OnBack() {
 
-		stage = Stage.Idle
+		when (stage) {
+
+			Stage.Idle -> {
+
+				splashActor.close()
+
+				authPresenterActor.close()
+
+			}
+
+			Stage.Splash -> {
+
+				splashActor.send(SplashActor.InMsg.OnBack)
+
+			}
+
+			Stage.Auth -> {
+
+				authPresenterActor.send(AuthPresenterActor.InMsg.OnBack)
+
+			}
+
+			Stage.Home -> {
+
+			}
+
+		}
 
 	}
 
@@ -133,6 +167,5 @@ class MainActor(sendChannel: SendChannel<UIActorMsg>) : Actor<MainActor.InMsg>(
 		object OnBack : InMsg()
 
 	}
-
 
 }

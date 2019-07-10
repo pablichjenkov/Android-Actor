@@ -1,14 +1,12 @@
 package com.hamperapp.actor
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 
-abstract class Actor<T> {
+
+abstract class Actor<in T> {
 
 	private val job = SupervisorJob()
 
@@ -40,6 +38,11 @@ abstract class Actor<T> {
 
 	}
 
-	abstract fun onAction(inMsg: T)
+	fun close() {
+		sendChannel.close()
+		scope.cancel()
+	}
+
+	protected abstract fun onAction(inMsg: T)
 
 }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.channels.consumeEach
 
 class MainActivity : AppCompatActivity() {
 
-    val uiScope = CoroutineScope(Dispatchers.Main)
+    private val uiScope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var renderBox: RenderContextDefault
 
@@ -43,8 +43,11 @@ class MainActivity : AppCompatActivity() {
         mainActor.send(MainActor.InMsg.OnStop)
     }
 
+    /**
+     * We never called super.onBackPressed() method. We propagate the Back pressed event to children Actors. Later on,
+     * if we receive a BackResult consumed event, then we finish this Activity.
+     */
     override fun onBackPressed() {
-        super.onBackPressed()
         mainActor.send(MainActor.InMsg.OnBack)
     }
 
@@ -74,9 +77,11 @@ class MainActivity : AppCompatActivity() {
 
                     }
 
-                    is UIActorMsg.PopView -> {
+                    is UIActorMsg.BackResult -> {
 
-                        //renderBox.popView()
+                        if (! uiMsg.consumed) {
+                            finish()
+                        }
 
                     }
 
@@ -98,6 +103,6 @@ sealed class UIActorMsg {
 
     class PushView(val fragment: Fragment, val id: String) : UIActorMsg()
 
-    object PopView : UIActorMsg()
+    class BackResult(val consumed: Boolean) : UIActorMsg()
 
 }

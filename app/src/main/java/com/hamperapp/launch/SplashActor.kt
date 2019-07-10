@@ -7,8 +7,8 @@ import kotlinx.coroutines.channels.SendChannel
 
 
 class SplashActor(
-    var uiSendChannel: SendChannel<UIActorMsg>,
-    var observerChannel: SendChannel<OutMsg>? = null
+    private var uiSendChannel: SendChannel<UIActorMsg>,
+    private var observerChannel: SendChannel<OutMsg>?
 ) : Actor<SplashActor.InMsg>() {
 
     lateinit var fragmentSink: SendChannel<OutMsg.View>

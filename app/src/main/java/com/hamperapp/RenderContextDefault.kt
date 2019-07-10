@@ -1,7 +1,5 @@
 package com.hamperapp
 
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
