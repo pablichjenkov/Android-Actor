@@ -33,13 +33,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         mainActor.send(MainActor.InMsg.OnStart)
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         mainActor.send(MainActor.InMsg.OnStop)
     }
 
@@ -59,11 +59,7 @@ class MainActivity : AppCompatActivity() {
 
                 when (uiMsg) {
 
-                    is UIActorMsg.SetTitle -> {
-
-                        title = uiMsg.title
-
-                    }
+                    is UIActorMsg.SetTitle -> { title = uiMsg.title }
 
                     is UIActorMsg.SetView -> {
 
@@ -71,16 +67,20 @@ class MainActivity : AppCompatActivity() {
 
                     }
 
-                    is UIActorMsg.PushView -> {
-
-                        renderBox.setView(uiMsg.fragment, uiMsg.id)
-
-                    }
-
                     is UIActorMsg.BackResult -> {
 
+                        // If a BackResult message indicates that no child Actor consumed the Back Pressed event.
+                        // Then it is safe to finish our Activity now.
                         if (! uiMsg.consumed) {
+
+                            mainActor.close()
+
+                            uiSendChannel.close()
+
+                            uiScope.cancel()
+
                             finish()
+
                         }
 
                     }
@@ -100,8 +100,6 @@ sealed class UIActorMsg {
     class SetTitle(val title: String) : UIActorMsg()
 
     class SetView(val fragment: Fragment, val id: String) : UIActorMsg()
-
-    class PushView(val fragment: Fragment, val id: String) : UIActorMsg()
 
     class BackResult(val consumed: Boolean) : UIActorMsg()
 
