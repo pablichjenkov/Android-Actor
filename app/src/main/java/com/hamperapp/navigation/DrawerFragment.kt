@@ -1,6 +1,7 @@
 package com.hamperapp.navigation
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,11 +30,7 @@ class DrawerFragment : Fragment() {
 
 	private lateinit var renderBox: RenderContextDefault
 
-	var drawerAdapter = DrawerAdapter { position ->
-
-		actor.send(DrawerUIActor.InMsg.View.OnMenuItemSelected(position))
-
-	}
+	private lateinit var drawerAdapter: DrawerAdapter
 
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +60,12 @@ class DrawerFragment : Fragment() {
 
 					}
 
+					is UIActorMsg.ShowNavigation -> {
+
+						setupNavigationRecycler(msg.navItems)
+
+					}
+
 				}
 
 			}
@@ -86,10 +89,6 @@ class DrawerFragment : Fragment() {
 
 		renderBox = RenderContextDefault(childFragmentManager, drawerBox)
 
-		navigationRecycler.layoutManager = LinearLayoutManager(context)
-
-		navigationRecycler.adapter = drawerAdapter
-
 	}
 
 	override fun onStart() {
@@ -105,6 +104,22 @@ class DrawerFragment : Fragment() {
 		actor.send(DrawerUIActor.InMsg.View.OnViewStop)
 
 		fragmentCoroutineScope.coroutineContext.cancelChildren()
+
+	}
+
+	private fun setupNavigationRecycler(navItems: List<String>) {
+
+		drawerAdapter = DrawerAdapter(navItems) { position ->
+
+			actor.send(DrawerUIActor.InMsg.View.OnMenuItemSelected(position))
+
+			drawerLayout.closeDrawer(Gravity.RIGHT)
+
+		}
+
+		navigationRecycler.layoutManager = LinearLayoutManager(context)
+
+		navigationRecycler.adapter = drawerAdapter
 
 	}
 

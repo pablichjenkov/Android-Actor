@@ -12,11 +12,38 @@ abstract class Actor<in T> {
 
 	protected var scope = CoroutineScope(Dispatchers.IO + job)
 
-	private val mainInputChannel: SendChannel<T>
+	private lateinit var principalInputChannel: SendChannel<T>
+
 
 	init {
 
-		mainInputChannel = scope.actor {
+		startPrincipalCoroutineActor()
+
+	}
+
+	fun send(inMsg: T) {
+
+		scope.launch {
+
+			principalInputChannel.send(inMsg)
+
+		}
+
+	}
+
+	fun close() {
+
+		onClose()
+
+		principalInputChannel.close()
+
+		scope.cancel()
+
+	}
+
+	protected fun startPrincipalCoroutineActor() {
+
+		principalInputChannel = scope.actor {
 
 			consumeEach {
 
@@ -28,20 +55,7 @@ abstract class Actor<in T> {
 
 	}
 
-	fun send(inMsg: T) {
-
-		scope.launch {
-
-			mainInputChannel.send(inMsg)
-
-		}
-
-	}
-
-	fun close() {
-		mainInputChannel.close()
-		scope.cancel()
-	}
+	protected open fun onClose() {}
 
 	protected abstract fun onAction(inMsg: T)
 

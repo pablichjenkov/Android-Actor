@@ -3,7 +3,6 @@ package com.hamperapp.home
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.BaseActor
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,13 +38,7 @@ class HomeActor(
 
 			}
 
-			BaseActor.InMsg.OnStop -> {
-
-				//TODO(Pablo): When calling bellow method the internal actor coroutine is cancelled. Leaving this class
-				// un-usable. One way to evade that is by always creating a new Coroutine actor in onStart.
-				//scope.coroutineContext.cancelChildren()
-
-			}
+			BaseActor.InMsg.OnStop -> {}
 
 			BaseActor.InMsg.OnBack -> {
 

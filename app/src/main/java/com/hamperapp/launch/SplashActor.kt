@@ -36,11 +36,7 @@ class SplashActor(
 
 			}
 
-			BaseActor.InMsg.OnStop -> {
-
-				scope.coroutineContext.cancelChildren()
-
-			}
+			BaseActor.InMsg.OnStop -> {}
 
 			BaseActor.InMsg.OnBack -> {
 

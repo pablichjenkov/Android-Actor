@@ -100,6 +100,8 @@ class MainActivity : AppCompatActivity() {
 
                     }
 
+                    is UIActorMsg.ShowNavigation -> {}
+
                 }
 
             }
@@ -121,5 +123,7 @@ sealed class UIActorMsg {
     class Toast(val message: String) : UIActorMsg()
 
     class BackResult(val consumed: Boolean) : UIActorMsg()
+
+    class ShowNavigation(val navItems: List<String>) : UIActorMsg()
 
 }

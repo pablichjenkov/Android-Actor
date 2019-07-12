@@ -6,7 +6,6 @@ import com.hamperapp.actor.BaseActor
 import com.hamperapp.home.HomeActor
 import com.hamperapp.launch.SplashActor
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
@@ -21,7 +20,7 @@ class DrawerUIActor(
 
     private var uiSendChannel: SendChannel<UIActorMsg>? = null
 
-    private var childrenActor: List<BaseActor<*>>? = null
+    private lateinit var childrenActors: List<BaseActor<*>>
 
     private var activeActor: BaseActor<*>? = null
 
@@ -50,11 +49,7 @@ class DrawerUIActor(
 
             }
 
-            BaseActor.InMsg.OnStop -> {
-
-                scope.coroutineContext.cancelChildren()
-
-            }
+            BaseActor.InMsg.OnStop -> {}
 
             BaseActor.InMsg.OnBack -> {
 
@@ -84,12 +79,23 @@ class DrawerUIActor(
 
                 uiSendChannel?.run {
 
-                    childrenActor = mutableListOf(
+                    childrenActors = mutableListOf(
                         createHomeActor(this),
                         createSplashActor(this)
                     )
 
+                    val menuItems: List<String> = childrenActors.map {
+                        it.javaClass.simpleName
+                    }
+
+                    scope.launch {
+
+                        fragmentSink.send(UIActorMsg.ShowNavigation(menuItems))
+
+                    }
+
                     switchActor(0)
+
                 }
 
             }
@@ -211,21 +217,15 @@ class DrawerUIActor(
 
         scope.launch {
 
-            //fragmentSink.send(OutMsg.View.Toast("position ${position} clicked"))
+            if (position < childrenActors.size) {
 
-            childrenActor?.run {
+                activeActor?.sendCommonMsg(BaseActor.InMsg.OnStop)
 
-                if (position < size) {
+                childrenActors[position].let { childActor ->
 
-                    activeActor?.sendCommonMsg(BaseActor.InMsg.OnStop)
+                    childActor.sendCommonMsg(BaseActor.InMsg.OnStart)
 
-                    get(position).let { childActor ->
-
-                        childActor.sendCommonMsg(BaseActor.InMsg.OnStart)
-
-                        activeActor = childActor
-
-                    }
+                    activeActor = childActor
 
                 }
 

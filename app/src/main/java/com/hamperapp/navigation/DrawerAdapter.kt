@@ -9,7 +9,8 @@ import kotlinx.android.synthetic.main.cell_drawer.view.*
 
 
 class DrawerAdapter(
-	val clickCallback: (Int) -> Unit
+	private val navMenuItems: List<String>,
+	private val clickCallback: (Int) -> Unit
 ) : RecyclerView.Adapter<DrawerAdapter.VH>() {
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -23,12 +24,12 @@ class DrawerAdapter(
 	}
 
 	override fun getItemCount(): Int {
-		return 10
+		return navMenuItems.size
 	}
 
 	override fun onBindViewHolder(holder: VH, position: Int) {
 
-		val title = "Option $position"
+		val title = navMenuItems[position]
 
 		holder.itemView.itemTitle.text = title
 
