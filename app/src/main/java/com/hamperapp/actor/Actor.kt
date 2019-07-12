@@ -10,13 +10,13 @@ abstract class Actor<in T> {
 
 	private val job = SupervisorJob()
 
-	protected val scope = CoroutineScope(Dispatchers.IO + job)
+	protected var scope = CoroutineScope(Dispatchers.IO + job)
 
-	private val sendChannel: SendChannel<T>
+	private val mainInputChannel: SendChannel<T>
 
 	init {
 
-		sendChannel = scope.actor {
+		mainInputChannel = scope.actor {
 
 			consumeEach {
 
@@ -32,14 +32,14 @@ abstract class Actor<in T> {
 
 		scope.launch {
 
-			sendChannel.send(inMsg)
+			mainInputChannel.send(inMsg)
 
 		}
 
 	}
 
 	fun close() {
-		sendChannel.close()
+		mainInputChannel.close()
 		scope.cancel()
 	}
 

@@ -1,7 +1,7 @@
 package com.hamperapp.auth
 
 import com.hamperapp.UIActorMsg
-import com.hamperapp.actor.Actor
+import com.hamperapp.actor.BaseActor
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
@@ -12,7 +12,7 @@ class AuthPresenterActor(
     private var authActor: AuthActor,
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-): Actor<AuthPresenterActor.InMsg>() {
+): BaseActor<AuthPresenterActor.InMsg>() {
 
     enum class Stage {
         Login,
@@ -24,27 +24,35 @@ class AuthPresenterActor(
     lateinit var fragmentSink: SendChannel<OutMsg.View>
 
 
-    override fun onAction(inMsg: InMsg) {
+    override fun onCommonAction(commonMsg: BaseActor.InMsg) {
 
-        when (inMsg) {
+        when (commonMsg) {
 
-            InMsg.OnStart -> {
+            BaseActor.InMsg.OnStart -> {
 
                 when (stage) {
 
                     Stage.Login -> showLogin()
 
-                    Stage.Signup -> showLogin()
+                    Stage.Signup -> showSignup()
 
                 }
 
             }
 
-            InMsg.OnStop -> {
-                //scope.coroutineContext.cancelChildren()
+            BaseActor.InMsg.OnStop -> {
+                scope.coroutineContext.cancelChildren()
             }
 
-            InMsg.OnBack -> { onBackPressed() }
+            BaseActor.InMsg.OnBack -> { onBackPressed() }
+
+        }
+
+    }
+
+    override fun onAction(inMsg: InMsg) {
+
+        when (inMsg) {
 
             InMsg.View.OnLoginViewReady -> {}
 
@@ -57,6 +65,10 @@ class AuthPresenterActor(
                     delay(2000)
 
                     fragmentSink.send(OutMsg.View.OnSuccess)
+
+                    delay(1000)
+
+                    observerChannel?.send(OutMsg.AuthSuccess("SUCCESS_TOKEN"))
 
                 }
 
@@ -86,7 +98,7 @@ class AuthPresenterActor(
 
         val loginFragment = LoginFragment.newInstance(this)
 
-        val uiMsg = UIActorMsg.SetView(loginFragment, "loginFragment")
+        val uiMsg = UIActorMsg.SetFragment(loginFragment, "loginFragment")
 
         scope.launch {
 
@@ -105,7 +117,7 @@ class AuthPresenterActor(
 
         val signupFragment = SignupFragment.newInstance(this)
 
-        val uiMsg = UIActorMsg.SetView(signupFragment, "signupFragment")
+        val uiMsg = UIActorMsg.SetFragment(signupFragment, "signupFragment")
 
         scope.launch {
 
@@ -126,7 +138,7 @@ class AuthPresenterActor(
 
                 scope.launch {
 
-                    observerChannel?.send(OutMsg.AuthError("Auth Cancelled"))
+                    observerChannel?.send(OutMsg.AuthError("Back Pressed Cancelled"))
 
                 }
 
@@ -136,17 +148,9 @@ class AuthPresenterActor(
 
         }
 
-
     }
 
     sealed class InMsg {
-
-        object OnStart : InMsg()
-
-        object OnStop : InMsg()
-
-        object OnBack : InMsg()
-
 
         sealed class View : InMsg() {
 

@@ -1,15 +1,18 @@
-package com.hamperapp.launch
+package com.hamperapp.home
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.BaseActor
-import kotlinx.coroutines.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
-class SplashActor(
+class HomeActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : BaseActor<SplashActor.InMsg>() {
+) : BaseActor<HomeActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
@@ -20,11 +23,11 @@ class SplashActor(
 
 			BaseActor.InMsg.OnStart -> {
 
-				val titleMsg = UIActorMsg.SetTitle("Splash Screen")
+				val titleMsg = UIActorMsg.SetTitle("Home Screen")
 
-				val splashFragment = SplashFragment.newInstance(this)
+				val homeFragment = HomeFragment.newInstance(this)
 
-				val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
+				val uiMsg = UIActorMsg.SetFragment(homeFragment, "homeFragment")
 
 				scope.launch {
 
@@ -38,7 +41,9 @@ class SplashActor(
 
 			BaseActor.InMsg.OnStop -> {
 
-				scope.coroutineContext.cancelChildren()
+				//TODO(Pablo): When calling bellow method the internal actor coroutine is cancelled. Leaving this class
+				// un-usable. One way to evade that is by always creating a new Coroutine actor in onStart.
+				//scope.coroutineContext.cancelChildren()
 
 			}
 
@@ -71,7 +76,7 @@ class SplashActor(
 
                     delay(1000)
 
-                    observerChannel?.send(OutMsg.OnSplashComplete)
+                    observerChannel?.send(OutMsg.OnHomeComplete)
 
                 }
 
@@ -98,7 +103,7 @@ class SplashActor(
 
     sealed class OutMsg {
 
-        object OnSplashComplete : OutMsg()
+        object OnHomeComplete : OutMsg()
 
 
         sealed class View : OutMsg() {

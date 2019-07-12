@@ -1,8 +1,11 @@
 package com.hamperapp
 
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.hamperapp.actor.BaseActor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
@@ -35,12 +38,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mainActor.send(MainActor.InMsg.OnStart)
+        mainActor.sendCommonMsg(BaseActor.InMsg.OnStart)
     }
 
     override fun onStop() {
         super.onStop()
-        mainActor.send(MainActor.InMsg.OnStop)
+        mainActor.sendCommonMsg(BaseActor.InMsg.OnStop)
     }
 
     /**
@@ -48,7 +51,7 @@ class MainActivity : AppCompatActivity() {
      * if we receive a BackResult consumed event, then we finish this Activity.
      */
     override fun onBackPressed() {
-        mainActor.send(MainActor.InMsg.OnBack)
+        mainActor.sendCommonMsg(BaseActor.InMsg.OnBack)
     }
 
     private fun createUiActor() {
@@ -61,9 +64,21 @@ class MainActivity : AppCompatActivity() {
 
                     is UIActorMsg.SetTitle -> { title = uiMsg.title }
 
-                    is UIActorMsg.SetView -> {
+                    is UIActorMsg.SetFragment -> {
 
                         renderBox.setView(uiMsg.fragment, uiMsg.id)
+
+                    }
+
+                    is UIActorMsg.SetView -> {
+
+                        renderBox.setView(uiMsg.view)
+
+                    }
+
+                    is UIActorMsg.Toast -> {
+
+                        Toast.makeText(this@MainActivity, uiMsg.message, Toast.LENGTH_SHORT).show()
 
                     }
 
@@ -99,7 +114,11 @@ sealed class UIActorMsg {
 
     class SetTitle(val title: String) : UIActorMsg()
 
-    class SetView(val fragment: Fragment, val id: String) : UIActorMsg()
+    class SetFragment(val fragment: Fragment, val id: String) : UIActorMsg()
+
+    class SetView(val view: View) : UIActorMsg()
+
+    class Toast(val message: String) : UIActorMsg()
 
     class BackResult(val consumed: Boolean) : UIActorMsg()
 
