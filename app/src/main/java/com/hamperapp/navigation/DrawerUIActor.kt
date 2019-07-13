@@ -1,10 +1,10 @@
 package com.hamperapp.navigation
 
-import androidx.fragment.app.Fragment
 import com.hamperapp.UIActorMsg
-import com.hamperapp.actor.BaseActor
+import com.hamperapp.actor.Actor
 import com.hamperapp.home.HomeActor
 import com.hamperapp.launch.SplashActor
+import com.hamperapp.settings.SettingsActor
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
@@ -15,55 +15,32 @@ import kotlinx.coroutines.launch
 class DrawerUIActor(
     private var parentUISendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : BaseActor<DrawerUIActor.InMsg>() {
+) : Actor<DrawerUIActor.InMsg>() {
 
 
     private var uiSendChannel: SendChannel<UIActorMsg>? = null
 
-    private lateinit var childrenActors: List<BaseActor<*>>
+    private lateinit var childrenActors: List<Actor<*>>
 
-    private var activeActor: BaseActor<*>? = null
+    private var activeActor: Actor<*>? = null
 
     lateinit var fragmentSink: SendChannel<UIActorMsg>
 
 
-    override fun onCommonAction(commonMsg: BaseActor.InMsg) {
+    override fun start() {
+        super.start()
 
-        when (commonMsg) {
+        val titleMsg = UIActorMsg.SetTitle("Drawer Screen")
 
-            BaseActor.InMsg.OnStart -> {
+        val drawerFragment = DrawerFragment.newInstance(this)
 
-                val titleMsg = UIActorMsg.SetTitle("Drawer Screen")
+        val uiMsg = UIActorMsg.SetFragment(drawerFragment, "drawerFragment")
 
-                val drawerFragment = DrawerFragment.newInstance(this)
+        scope.launch {
 
-                val uiMsg = UIActorMsg.SetFragment(drawerFragment, "drawerFragment")
+            parentUISendChannel.send(titleMsg)
 
-                scope.launch {
-
-                    parentUISendChannel.send(titleMsg)
-
-                    parentUISendChannel.send(uiMsg)
-
-                }
-
-            }
-
-            BaseActor.InMsg.OnStop -> {}
-
-            BaseActor.InMsg.OnBack -> {
-
-                scope.launch {
-                    // TODO(Pablo): Remove this logic and propagate the OnBack event to all the children
-                    observerChannel?.send(OutMsg.OnDrawerComplete)
-
-                    observerChannel = null
-
-                    cancel()
-
-                }
-
-            }
+            parentUISendChannel.send(uiMsg)
 
         }
 
@@ -81,7 +58,8 @@ class DrawerUIActor(
 
                     childrenActors = mutableListOf(
                         createHomeActor(this),
-                        createSplashActor(this)
+                        createSplashActor(this),
+                        createSettingsActor(this)
                     )
 
                     val menuItems: List<String> = childrenActors.map {
@@ -107,6 +85,21 @@ class DrawerUIActor(
                 switchActor(inMsg.position)
 
             }
+
+        }
+
+    }
+
+    override fun back() {
+        super.back()
+
+        scope.launch {
+            // TODO(Pablo): Remove this logic and propagate the OnBack event to all the children
+            observerChannel?.send(OutMsg.OnDrawerComplete)
+
+            observerChannel = null
+
+            cancel()
 
         }
 
@@ -170,7 +163,7 @@ class DrawerUIActor(
     }
 
     // TODO(Pablo): DrawerActor should not know about its children Type or callbacks
-    private fun createHomeActor(uiSendChannel: SendChannel<UIActorMsg>): BaseActor<*> {
+    private fun createHomeActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
         return HomeActor(
             uiSendChannel,
@@ -192,7 +185,7 @@ class DrawerUIActor(
     }
 
     // TODO(Pablo): DrawerActor should not know about its children Type or callbacks
-    private fun createSplashActor(uiSendChannel: SendChannel<UIActorMsg>): BaseActor<*> {
+    private fun createSplashActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
         return SplashActor(
             uiSendChannel,
@@ -213,17 +206,39 @@ class DrawerUIActor(
 
     }
 
+    // TODO(Pablo): DrawerActor should not know about its children Type or callbacks
+    private fun createSettingsActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
+
+        return SettingsActor(
+            uiSendChannel,
+            scope.actor {
+
+                consumeEach { splashMsg ->
+
+                    when (splashMsg) {
+
+                        SettingsActor.OutMsg.OnSettingsComplete -> {}
+
+                    }
+
+                }
+
+            }
+        )
+
+    }
+
     private fun switchActor(position: Int) {
 
         scope.launch {
 
             if (position < childrenActors.size) {
 
-                activeActor?.sendCommonMsg(BaseActor.InMsg.OnStop)
+                activeActor?.stop()
 
                 childrenActors[position].let { childActor ->
 
-                    childActor.sendCommonMsg(BaseActor.InMsg.OnStart)
+                    childActor.start()
 
                     activeActor = childActor
 
@@ -253,17 +268,6 @@ class DrawerUIActor(
     sealed class OutMsg {
 
         object OnDrawerComplete : OutMsg()
-
-
-        sealed class View : OutMsg() {
-
-            class SetFragment(val fragment: Fragment, val id: String) : View()
-
-            class SetView(val view: android.view.View) : View()
-
-            class Toast(val text: String) : View()
-
-        }
 
     }
 

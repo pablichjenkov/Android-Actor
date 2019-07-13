@@ -5,9 +5,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.hamperapp.actor.BaseActor
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
@@ -38,12 +39,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        mainActor.sendCommonMsg(BaseActor.InMsg.OnStart)
+        mainActor.start()
     }
 
     override fun onStop() {
         super.onStop()
-        mainActor.sendCommonMsg(BaseActor.InMsg.OnStop)
+        mainActor.stop()
     }
 
     /**
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity() {
      * if we receive a BackResult consumed event, then we finish this Activity.
      */
     override fun onBackPressed() {
-        mainActor.sendCommonMsg(BaseActor.InMsg.OnBack)
+        mainActor.back()
     }
 
     private fun createUiActor() {

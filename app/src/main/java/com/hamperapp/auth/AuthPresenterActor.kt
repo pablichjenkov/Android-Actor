@@ -1,7 +1,7 @@
 package com.hamperapp.auth
 
 import com.hamperapp.UIActorMsg
-import com.hamperapp.actor.BaseActor
+import com.hamperapp.actor.Actor
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
@@ -12,7 +12,7 @@ class AuthPresenterActor(
     private var authActor: AuthActor,
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-): BaseActor<AuthPresenterActor.InMsg>() {
+): Actor<AuthPresenterActor.InMsg>() {
 
     enum class Stage {
         Login,
@@ -24,27 +24,14 @@ class AuthPresenterActor(
     lateinit var fragmentSink: SendChannel<OutMsg.View>
 
 
-    override fun onCommonAction(commonMsg: BaseActor.InMsg) {
+    override fun start() {
+        super.start()
 
-        when (commonMsg) {
+        when (stage) {
 
-            BaseActor.InMsg.OnStart -> {
+            Stage.Login -> showLogin()
 
-                when (stage) {
-
-                    Stage.Login -> showLogin()
-
-                    Stage.Signup -> showSignup()
-
-                }
-
-            }
-
-            BaseActor.InMsg.OnStop -> {
-                scope.coroutineContext.cancelChildren()
-            }
-
-            BaseActor.InMsg.OnBack -> { onBackPressed() }
+            Stage.Signup -> showSignup()
 
         }
 
@@ -90,6 +77,12 @@ class AuthPresenterActor(
 
         }
 
+    }
+
+    override fun back() {
+        super.back()
+
+        onBackPressed()
     }
 
     private fun showLogin() {

@@ -1,17 +1,16 @@
-package com.hamperapp.home
+package com.hamperapp.settings
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class HomeActor(
+class SettingsActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : Actor<HomeActor.InMsg>() {
+) : Actor<SettingsActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
@@ -19,11 +18,11 @@ class HomeActor(
 	override fun start() {
 		super.start()
 
-		val titleMsg = UIActorMsg.SetTitle("Home Screen")
+		val titleMsg = UIActorMsg.SetTitle("Settings Screen")
 
-		val homeFragment = HomeFragment.newInstance(this)
+		val settingsFragment = SettingsFragment.newInstance(this)
 
-		val uiMsg = UIActorMsg.SetFragment(homeFragment, "homeFragment")
+		val uiMsg = UIActorMsg.SetFragment(settingsFragment, "settingsFragment")
 
 		scope.launch {
 
@@ -39,7 +38,7 @@ class HomeActor(
 
         when (inMsg) {
 
-            InMsg.View.OnViewReady -> {
+			InMsg.View.OnViewReady -> {
 
                 scope.launch {
 
@@ -51,7 +50,7 @@ class HomeActor(
 
                     delay(1000)
 
-                    observerChannel?.send(OutMsg.OnHomeComplete)
+                    observerChannel?.send(OutMsg.OnSettingsComplete)
 
                 }
 
@@ -68,7 +67,7 @@ class HomeActor(
 
 		observerChannel = null
 
-		scope.cancel()
+		close()
 
 	}
 
@@ -87,7 +86,7 @@ class HomeActor(
 
     sealed class OutMsg {
 
-        object OnHomeComplete : OutMsg()
+        object OnSettingsComplete : OutMsg()
 
 
         sealed class View : OutMsg() {

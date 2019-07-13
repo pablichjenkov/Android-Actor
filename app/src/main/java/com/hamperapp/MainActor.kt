@@ -1,6 +1,6 @@
 package com.hamperapp
 
-import com.hamperapp.actor.BaseActor
+import com.hamperapp.actor.Actor
 import com.hamperapp.auth.AuthPresenterActor
 import com.hamperapp.launch.SplashActor
 import com.hamperapp.navigation.DrawerUIActor
@@ -11,8 +11,8 @@ import kotlinx.coroutines.channels.consumeEach
 
 
 class MainActor(
-	private val uiSendChannel: SendChannel<UIActorMsg>) : BaseActor<MainActor.InMsg>(
-) {
+	private val uiSendChannel: SendChannel<UIActorMsg>
+): Actor<MainActor.InMsg>() {
 
 	enum class Stage {
 		Idle,
@@ -23,7 +23,7 @@ class MainActor(
 
 	private var stage: Stage = Stage.Idle
 
-	private var activeActor: BaseActor<*>? = null
+	private var activeActor: Actor<*>? = null
 
 	private var authActor = HamperApplication.instance.authActor
 
@@ -40,21 +40,25 @@ class MainActor(
 	private val compositeDisposable = CompositeDisposable()
 
 
-	override fun onCommonAction(commonMsg: BaseActor.InMsg) {
+	override fun start() {
+		super.start()
 
-		when (commonMsg) {
-
-			BaseActor.InMsg.OnStart -> { onStart() }
-
-			BaseActor.InMsg.OnStop -> { onStop() }
-
-			BaseActor.InMsg.OnBack -> { OnBack() }
-
-		}
-
+		onStart()
 	}
 
-	override fun onAction(inMsg: InMsg) {}
+	override fun onAction(msg: InMsg) {}
+
+	override fun stop() {
+		super.stop()
+
+		onStop()
+	}
+
+	override fun back() {
+		super.back()
+
+		onBack()
+	}
 
 	private fun createSplashActorObserverChannel() : SendChannel<SplashActor.OutMsg> = scope.actor {
 
@@ -66,9 +70,9 @@ class MainActor(
 
 					stage = Stage.Auth
 
-					activeActor?.sendCommonMsg(BaseActor.InMsg.OnStop)
+					activeActor?.stop()
 
-					authPresenterActor.sendCommonMsg(BaseActor.InMsg.OnStart)
+					authPresenterActor.start()
 
 					activeActor = authPresenterActor
 
@@ -90,9 +94,9 @@ class MainActor(
 
 					stage = Stage.Drawer
 
-					activeActor?.sendCommonMsg(BaseActor.InMsg.OnStop)
+					activeActor?.stop()
 
-					drawerUIActor.sendCommonMsg(BaseActor.InMsg.OnStart)
+					drawerUIActor.start()
 
 					activeActor = drawerUIActor
 
@@ -136,7 +140,7 @@ class MainActor(
 
 				stage = Stage.Splash
 
-				splashActor.sendCommonMsg(BaseActor.InMsg.OnStart)
+				splashActor.start()
 
 				activeActor = splashActor
 
@@ -164,7 +168,7 @@ class MainActor(
 
 	}
 
-	private fun OnBack() {
+	private fun onBack() {
 
 		when (stage) {
 
@@ -180,7 +184,7 @@ class MainActor(
 
 			else -> {
 
-				activeActor?.sendCommonMsg(BaseActor.InMsg.OnBack)
+				activeActor?.back()
 
 			}
 
@@ -188,6 +192,7 @@ class MainActor(
 
 	}
 
-	sealed class InMsg {}
+
+	sealed class InMsg
 
 }

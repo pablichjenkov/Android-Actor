@@ -4,20 +4,27 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
+import java.util.concurrent.atomic.AtomicBoolean
 
 
-abstract class Actor<in T> {
+abstract class Actor<T> {
 
 	private val job = SupervisorJob()
 
 	protected var scope = CoroutineScope(Dispatchers.IO + job)
 
-	private lateinit var principalInputChannel: SendChannel<T>
+	private var actorInputChannel: SendChannel<T>? = null
+
+	private var isStarted: AtomicBoolean = AtomicBoolean(false)
 
 
-	init {
+	open fun start() {
 
-		startPrincipalCoroutineActor()
+		if (isStarted.compareAndSet(false, true)) {
+
+			startCoroutineActor()
+
+		}
 
 	}
 
@@ -25,29 +32,43 @@ abstract class Actor<in T> {
 
 		scope.launch {
 
-			principalInputChannel.send(inMsg)
+			actorInputChannel?.send(inMsg)
 
 		}
 
 	}
 
+	/**
+	 * Common method to not repeat the cancelChildren() call in every subclass.
+	 * It will cancel both child Actor-Coroutines the Principal and the Common.
+	 * */
+	open fun stop() {
+
+		scope.coroutineContext.cancelChildren()
+
+		isStarted.set(false)
+
+	}
+
+	open fun back() {}
+
 	fun close() {
 
 		onClose()
 
-		principalInputChannel.close()
+		actorInputChannel?.close()
 
 		scope.cancel()
 
 	}
 
-	protected fun startPrincipalCoroutineActor() {
+	private fun startCoroutineActor() {
 
-		principalInputChannel = scope.actor {
+		actorInputChannel = scope.actor {
 
-			consumeEach {
+			consumeEach { msg ->
 
-				onAction(it)
+				onAction(msg)
 
 			}
 

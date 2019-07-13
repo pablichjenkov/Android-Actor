@@ -1,51 +1,34 @@
 package com.hamperapp.launch
 
 import com.hamperapp.UIActorMsg
-import com.hamperapp.actor.BaseActor
-import kotlinx.coroutines.*
+import com.hamperapp.actor.Actor
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class SplashActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : BaseActor<SplashActor.InMsg>() {
+) : Actor<SplashActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
 
-	override fun onCommonAction(commonMsg: BaseActor.InMsg) {
+	override fun start() {
+		super.start()
 
-		when (commonMsg) {
+		val titleMsg = UIActorMsg.SetTitle("Splash Screen")
 
-			BaseActor.InMsg.OnStart -> {
+		val splashFragment = SplashFragment.newInstance(this)
 
-				val titleMsg = UIActorMsg.SetTitle("Splash Screen")
+		val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
 
-				val splashFragment = SplashFragment.newInstance(this)
+		scope.launch {
 
-				val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
+			uiSendChannel.send(titleMsg)
 
-				scope.launch {
-
-					uiSendChannel.send(titleMsg)
-
-					uiSendChannel.send(uiMsg)
-
-				}
-
-			}
-
-			BaseActor.InMsg.OnStop -> {}
-
-			BaseActor.InMsg.OnBack -> {
-
-				observerChannel = null
-
-				scope.cancel()
-
-			}
-
+			uiSendChannel.send(uiMsg)
 
 		}
 
@@ -78,6 +61,15 @@ class SplashActor(
         }
 
     }
+
+	override fun back() {
+		super.back()
+
+		observerChannel = null
+
+		close()
+
+	}
 
 
     sealed class InMsg {
