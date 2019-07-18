@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.hamperapp.R
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
@@ -18,6 +20,7 @@ class HomeFragment : Fragment() {
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var mailboxChannel: SendChannel<HomeActor.OutMsg.View>
+
 
     private lateinit var actor: HomeActor
 
@@ -62,6 +65,17 @@ class HomeFragment : Fragment() {
     ): View? {
 
         return inflater.inflate(R.layout.fragment_home, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        laundryBtn.setOnClickListener {
+
+            actor.send(HomeActor.InMsg.View.OnLaundryClick)
+
+        }
+
     }
 
     override fun onStart() {

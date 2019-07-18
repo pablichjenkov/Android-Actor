@@ -12,10 +12,10 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 
 
-class DrawerUIActor(
+class NavigationActor(
     private var parentUISendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : Actor<DrawerUIActor.InMsg>() {
+) : Actor<NavigationActor.InMsg>() {
 
 
     private var uiSendChannel: SendChannel<UIActorMsg>? = null
@@ -24,13 +24,15 @@ class DrawerUIActor(
 
     private var activeActor: Actor<*>? = null
 
+    private lateinit var defaultActor: Actor<*>
+
     lateinit var fragmentSink: SendChannel<UIActorMsg>
 
 
     override fun start() {
         super.start()
 
-        val titleMsg = UIActorMsg.SetTitle("Drawer Screen")
+        val titleMsg = UIActorMsg.SetTitle("Navigation Screen")
 
         val drawerFragment = DrawerFragment.newInstance(this)
 
@@ -72,7 +74,8 @@ class DrawerUIActor(
 
                     }
 
-                    switchActor(0)
+                    defaultActor = childrenActors[0]
+                    setActiveActor(0)
 
                 }
 
@@ -82,7 +85,7 @@ class DrawerUIActor(
 
             is InMsg.View.OnMenuItemSelected -> {
 
-                switchActor(inMsg.position)
+                setActiveActor(inMsg.position)
 
             }
 
@@ -93,15 +96,7 @@ class DrawerUIActor(
     override fun back() {
         super.back()
 
-        scope.launch {
-            // TODO(Pablo): Remove this logic and propagate the OnBack event to all the children
-            observerChannel?.send(OutMsg.OnDrawerComplete)
-
-            observerChannel = null
-
-            cancel()
-
-        }
+        activeActor?.back()
 
     }
 
@@ -116,41 +111,45 @@ class DrawerUIActor(
                     is UIActorMsg.SetTitle -> {
 
                         parentUISendChannel.send(uiMsg)
-                        // title = uiMsg.title
 
                     }
 
                     is UIActorMsg.SetFragment -> {
 
                         fragmentSink.send(uiMsg)
-                        //renderBox.setView(uiMsg.fragment, uiMsg.id)
 
                     }
 
                     is UIActorMsg.SetView -> {
 
                         fragmentSink.send(uiMsg)
-                        //renderBox.setView(uiMsg.view)
 
                     }
 
                     is UIActorMsg.BackResult -> {
 
-                        // TODO(Pablo): Apply logic to always com back to the previous fragment
-                        // as in a regular stack and only exit when Home is current.
-                        // If a BackResult message indicates that no child Actor consumed the Back Pressed event.
-                        // Then it is safe to finish our Activity now.
-                        /*if (! uiMsg.consumed) {
+                        if (activeActor == defaultActor) {
 
-                            mainActor.close()
+                            scope.launch {
 
-                            uiSendChannel.close()
+                                closeChildrenActor()
 
-                            uiScope.cancel()
+                                observerChannel?.send(OutMsg.OnDrawerComplete)
 
-                            finish()
+                                observerChannel = null
 
-                        }*/
+                                cancel()
+
+                            }
+
+                        }
+                        else {
+
+                            defaultActor = childrenActors[0]
+
+                            setActiveActor(0)
+
+                        }
 
                     }
 
@@ -162,73 +161,34 @@ class DrawerUIActor(
 
     }
 
-    // TODO(Pablo): DrawerActor should not know about its children Type or callbacks
     private fun createHomeActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
         return HomeActor(
             uiSendChannel,
-            scope.actor {
-
-                consumeEach { msg ->
-
-                    when (msg) {
-
-                        HomeActor.OutMsg.OnHomeComplete -> {}
-
-                    }
-
-                }
-
-            }
+            null
         )
 
     }
 
-    // TODO(Pablo): DrawerActor should not know about its children Type or callbacks
     private fun createSplashActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
         return SplashActor(
             uiSendChannel,
-            scope.actor {
-
-                consumeEach { splashMsg ->
-
-                    when (splashMsg) {
-
-                        SplashActor.OutMsg.OnSplashComplete -> {}
-
-                    }
-
-                }
-
-            }
+            null
         )
 
     }
 
-    // TODO(Pablo): DrawerActor should not know about its children Type or callbacks
     private fun createSettingsActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
         return SettingsActor(
             uiSendChannel,
-            scope.actor {
-
-                consumeEach { splashMsg ->
-
-                    when (splashMsg) {
-
-                        SettingsActor.OutMsg.OnSettingsComplete -> {}
-
-                    }
-
-                }
-
-            }
+            null
         )
 
     }
 
-    private fun switchActor(position: Int) {
+    private fun setActiveActor(position: Int) {
 
         scope.launch {
 
@@ -249,6 +209,8 @@ class DrawerUIActor(
         }
 
     }
+
+    private fun closeChildrenActor() = childrenActors.forEach { it.close() }
 
 
     sealed class InMsg {

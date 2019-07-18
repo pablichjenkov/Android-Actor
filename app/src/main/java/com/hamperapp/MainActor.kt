@@ -3,7 +3,7 @@ package com.hamperapp
 import com.hamperapp.actor.Actor
 import com.hamperapp.auth.AuthPresenterActor
 import com.hamperapp.launch.SplashActor
-import com.hamperapp.navigation.DrawerUIActor
+import com.hamperapp.navigation.NavigationActor
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
@@ -35,7 +35,7 @@ class MainActor(
 		observerChannel = createAuthPresenterActorObserverChannel()
 	)
 
-	private var drawerUIActor = DrawerUIActor(uiSendChannel, createDrawerUIActorObserverChannel())
+	private var drawerUIActor = NavigationActor(uiSendChannel, createDrawerUIActorObserverChannel())
 
 	private val compositeDisposable = CompositeDisposable()
 
@@ -116,13 +116,13 @@ class MainActor(
 
 	}
 
-	private fun createDrawerUIActorObserverChannel() : SendChannel<DrawerUIActor.OutMsg> = scope.actor {
+	private fun createDrawerUIActorObserverChannel() : SendChannel<NavigationActor.OutMsg> = scope.actor {
 
 		consumeEach { authPMsg ->
 
 			when (authPMsg) {
 
-				is DrawerUIActor.OutMsg.OnDrawerComplete -> {
+				is NavigationActor.OutMsg.OnDrawerComplete -> {
 					uiSendChannel.send(UIActorMsg.BackResult(false))
 				}
 
@@ -155,7 +155,7 @@ class MainActor(
 			}
 
 			Stage.Drawer -> {
-				// Let DrawerFragment.onStart() propagate this event to DrawerUIActor()
+				// Let DrawerFragment.onStart() propagate this event to NavigationActor()
 			}
 
 		}

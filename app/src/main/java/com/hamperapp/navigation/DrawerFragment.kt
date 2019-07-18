@@ -26,7 +26,7 @@ class DrawerFragment : Fragment() {
 
 	private lateinit var mailboxChannel: SendChannel<UIActorMsg>
 
-	private lateinit var actor: DrawerUIActor
+	private lateinit var actor: NavigationActor
 
 	private lateinit var renderBox: RenderContextDefault
 
@@ -94,14 +94,14 @@ class DrawerFragment : Fragment() {
 	override fun onStart() {
 		super.onStart()
 
-		actor.send(DrawerUIActor.InMsg.View.OnViewReady)
+		actor.send(NavigationActor.InMsg.View.OnViewReady)
 
 	}
 
 	override fun onStop() {
 		super.onStop()
 
-		actor.send(DrawerUIActor.InMsg.View.OnViewStop)
+		actor.send(NavigationActor.InMsg.View.OnViewStop)
 
 		fragmentCoroutineScope.coroutineContext.cancelChildren()
 
@@ -111,7 +111,7 @@ class DrawerFragment : Fragment() {
 
 		drawerAdapter = DrawerAdapter(navItems) { position ->
 
-			actor.send(DrawerUIActor.InMsg.View.OnMenuItemSelected(position))
+			actor.send(NavigationActor.InMsg.View.OnMenuItemSelected(position))
 
 			drawerLayout.closeDrawer(Gravity.RIGHT)
 
@@ -126,7 +126,7 @@ class DrawerFragment : Fragment() {
 	companion object {
 
 		@JvmStatic
-		fun newInstance(actor: DrawerUIActor) =
+		fun newInstance(actor: NavigationActor) =
 
 			DrawerFragment().apply {
 

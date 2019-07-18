@@ -65,9 +65,11 @@ class SplashActor(
 	override fun back() {
 		super.back()
 
-		observerChannel = null
+		scope.launch {
+			uiSendChannel.send(UIActorMsg.BackResult(false))
+		}
 
-		close()
+		observerChannel = null
 
 	}
 
