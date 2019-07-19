@@ -94,7 +94,6 @@ class NavigationActor(
     }
 
     override fun back() {
-        super.back()
 
         activeActor?.back()
 
@@ -135,8 +134,6 @@ class NavigationActor(
                                 closeChildrenActor()
 
                                 observerChannel?.send(OutMsg.OnDrawerComplete)
-
-                                observerChannel = null
 
                                 cancel()
 

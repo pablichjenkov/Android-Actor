@@ -6,8 +6,8 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 
 
-abstract class CollectionActor<T : CollectionActor.InMsg>(
-    private var uiSendChannel: SendChannel<UIActorMsg>
+abstract class CollectionActor<in T : CollectionActor.InMsg>(
+    protected var uiSendChannel: SendChannel<UIActorMsg>
 ) : Actor<T>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
@@ -19,7 +19,7 @@ abstract class CollectionActor<T : CollectionActor.InMsg>(
 
 		scope.launch {
 
-			val collectionFragment = CollectionFragment.newInstance(this@CollectionActor as CollectionActor<CollectionActor.InMsg>)
+			val collectionFragment = CollectionFragment.newInstance(this@CollectionActor as CollectionActor<InMsg>)
 
 			val uiMsg = UIActorMsg.SetFragment(collectionFragment, "collectionFragment")
 
@@ -53,13 +53,6 @@ abstract class CollectionActor<T : CollectionActor.InMsg>(
         }
 
     }
-
-	override fun back() {
-		super.back()
-
-		close()
-
-	}
 
 
 	open class InMsg {

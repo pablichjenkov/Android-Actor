@@ -7,16 +7,27 @@
     android:layout_height="match_parent"
     tools:openDrawer="end">
 
-    <FrameLayout
-        android:id="@+id/drawerBox"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.hamperapp.ui.CustomToolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"/>
+
+        <FrameLayout
+            android:id="@+id/drawerBox"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="end">
+        android:layout_gravity="left">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/navigationRecycler"

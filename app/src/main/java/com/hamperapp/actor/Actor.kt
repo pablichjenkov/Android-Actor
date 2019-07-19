@@ -7,7 +7,7 @@ import kotlinx.coroutines.channels.consumeEach
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-abstract class Actor<T> {
+abstract class Actor<in T> {
 
 	private val job = SupervisorJob()
 

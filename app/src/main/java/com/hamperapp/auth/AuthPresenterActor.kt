@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 class AuthPresenterActor(
     private var authActor: AuthActor,
     private var uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>?
+    private var observerChannel: SendChannel<OutMsg>
 ): Actor<AuthPresenterActor.InMsg>() {
 
     enum class Stage {

@@ -69,8 +69,6 @@ class SplashActor(
 			uiSendChannel.send(UIActorMsg.BackResult(false))
 		}
 
-		observerChannel = null
-
 	}
 
 

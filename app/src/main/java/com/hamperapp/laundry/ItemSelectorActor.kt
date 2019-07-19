@@ -3,11 +3,12 @@ package com.hamperapp.laundry
 import com.hamperapp.UIActorMsg
 import com.hamperapp.collection.CollectionActor
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.launch
 
 
 class ItemSelectorActor(
     uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>?
+    private var observerChannel: SendChannel<OutMsg>
 ) : CollectionActor<CollectionActor.InMsg>(uiSendChannel) {
 
 	override var title = "Laundry Items Selection"
@@ -25,11 +26,12 @@ class ItemSelectorActor(
     }
 
 	override fun back() {
-		super.back()
 
-		observerChannel = null
+		scope.launch {
 
-		close()
+			observerChannel?.send(OutMsg.OnItemSelectionCancel)
+
+		}
 
 	}
 
@@ -43,6 +45,8 @@ class ItemSelectorActor(
     sealed class OutMsg : CollectionActor.OutMsg() {
 
         object OnItemSelectionComplete : OutMsg()
+
+		object OnItemSelectionCancel : OutMsg()
 
     }
 

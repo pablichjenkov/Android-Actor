@@ -1,7 +1,6 @@
 package com.hamperapp.navigation
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -113,7 +112,7 @@ class DrawerFragment : Fragment() {
 
 			actor.send(NavigationActor.InMsg.View.OnMenuItemSelected(position))
 
-			drawerLayout.closeDrawer(Gravity.RIGHT)
+			drawerLayout.closeDrawer(navigationView)
 
 		}
 

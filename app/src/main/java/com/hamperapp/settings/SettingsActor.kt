@@ -66,10 +66,10 @@ class SettingsActor(
 		super.back()
 
 		scope.launch {
-			uiSendChannel.send(UIActorMsg.BackResult(false))
-		}
 
-		observerChannel = null
+			uiSendChannel.send(UIActorMsg.BackResult(false))
+
+		}
 
 	}
 

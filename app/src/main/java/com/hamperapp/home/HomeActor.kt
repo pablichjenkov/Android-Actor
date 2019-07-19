@@ -27,7 +27,76 @@ class HomeActor(
 
 		itemSelectorActor = ItemSelectorActor(uiSendChannel, createItemSelectorListener())
 
-		activeActor = itemSelectorActor
+		showHomeItems()
+
+	}
+
+	override fun onAction(inMsg: InMsg) {
+
+        when (inMsg) {
+
+            InMsg.View.OnViewReady -> {
+
+            }
+
+			InMsg.View.OnLaundryClick -> {
+
+				setActiveActor(itemSelectorActor)
+
+			}
+
+            InMsg.View.OnViewStop -> {}
+
+        }
+
+    }
+
+	override fun back() {
+
+		activeActor?.let { activeActor ->
+
+			activeActor.back()
+
+		} ?: run {
+
+			scope.launch {
+				uiSendChannel.send(UIActorMsg.BackResult(false))
+			}
+
+		}
+
+	}
+
+
+	private fun createItemSelectorListener() = scope.actor<ItemSelectorActor.OutMsg> {
+
+		consumeEach { msg ->
+
+			when (msg) {
+
+				ItemSelectorActor.OutMsg.OnItemSelectionComplete -> {
+
+					showHomeItems()
+
+				}
+
+				ItemSelectorActor.OutMsg.OnItemSelectionCancel -> {
+
+					showHomeItems()
+
+				}
+
+			}
+
+		}
+
+	}
+
+
+
+	private fun showHomeItems() {
+
+		setActiveActor(null)
 
 		val titleMsg = UIActorMsg.SetTitle("Home Screen")
 
@@ -45,45 +114,16 @@ class HomeActor(
 
 	}
 
-    override fun onAction(inMsg: InMsg) {
-
-        when (inMsg) {
-
-            InMsg.View.OnViewReady -> {
-
-            }
-
-			InMsg.View.OnLaundryClick -> {
-
-				itemSelectorActor.start()
-
-			}
-
-            InMsg.View.OnViewStop -> {}
-
-        }
-
-    }
-
-	override fun back() {
-		super.back()
+	private fun setActiveActor(nextActor: Actor<*>?) {
 
 		scope.launch {
-			uiSendChannel.send(UIActorMsg.BackResult(false))
-		}
 
-		observerChannel = null
+			activeActor?.stop()
 
-	}
+			nextActor?.start()
 
+			activeActor = nextActor
 
-	private fun createItemSelectorListener() = scope.actor<ItemSelectorActor.OutMsg> {
-
-		consumeEach { msg ->
-
-			when (msg) {
-
-			}
 
 		}
 
