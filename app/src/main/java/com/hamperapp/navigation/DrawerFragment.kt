@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.hamperapp.R
 import com.hamperapp.RenderContextDefault
 import com.hamperapp.UIActorMsg
+import com.hamperapp.ui.toggle
 import kotlinx.android.synthetic.main.fragment_drawer.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,12 @@ class DrawerFragment : Fragment() {
 			consumeEach { msg ->
 
 				when (msg) {
+
+					is UIActorMsg.SetTitle -> {
+
+						customActionBar.setTitle(msg.title)
+
+					}
 
 					is UIActorMsg.SetFragment -> {
 
@@ -87,6 +94,14 @@ class DrawerFragment : Fragment() {
 		super.onViewCreated(view, savedInstanceState)
 
 		renderBox = RenderContextDefault(childFragmentManager, drawerBox)
+
+		customActionBar.setObserver {
+
+			onLeftIconTap = { drawerLayout.toggle(navigationView) }
+
+			onRightIconTap = {}
+
+		}
 
 	}
 

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="40dp"
+    android:layout_height="56dp"
     android:gravity="center_vertical|start"
     android:orientation="vertical">
 
@@ -15,7 +15,7 @@
         android:lines="1"
         android:singleLine="true"
         android:textSize="14sp"
-        tools:text="Some drawer text" />
+        tools:text="Primary Text" />
 
     <TextView
         android:id="@+id/description"
@@ -26,6 +26,11 @@
         android:lines="1"
         android:singleLine="true"
         android:textSize="14sp"
-        tools:text="Some drawer text" />
+        tools:text="Secondary Text" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/colorPrimary"/>
 
 </LinearLayout>

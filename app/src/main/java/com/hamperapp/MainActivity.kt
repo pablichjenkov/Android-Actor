@@ -63,7 +63,11 @@ class MainActivity : AppCompatActivity() {
 
                 when (uiMsg) {
 
-                    is UIActorMsg.SetTitle -> { title = uiMsg.title }
+                    is UIActorMsg.SetTitle -> {
+
+                        title = uiMsg.title
+
+                    }
 
                     is UIActorMsg.SetFragment -> {
 

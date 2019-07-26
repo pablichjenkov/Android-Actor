@@ -4,17 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.hamperapp.R
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.GenericItem
 import com.mikepenz.fastadapter.adapters.ItemAdapter
-import com.mikepenz.fastadapter.items.AbstractItem
 import com.mikepenz.fastadapter.select.getSelectExtension
-import kotlinx.android.synthetic.main.fragment_collection.*
+import kotlinx.android.synthetic.main.fragment_collection.recyclerView
+import kotlinx.android.synthetic.main.fragment_top_bottom_wrap_collection.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
@@ -22,7 +24,7 @@ import kotlinx.coroutines.channels.consumeEach
 import java.util.ArrayList
 
 
-class CollectionFragment : Fragment() {
+class WrapCollectionFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
@@ -74,13 +76,20 @@ class CollectionFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_collection, container, false)
+        return inflater.inflate(R.layout.fragment_top_bottom_wrap_collection, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupAdapter()
+
+        bottomFrame.setOnClickListener {
+
+            actor.send(CollectionActor.InMsg.View.OnBottomViewClick)
+
+        }
+
     }
 
     override fun onStart() {
@@ -113,7 +122,6 @@ class CollectionFragment : Fragment() {
 
         fastAdapter.setHasStableIds(true)
 
-
         //val layoutManager = LinearLayoutManager(context)
 
         val layoutManager = GridLayoutManager(context, 2)
@@ -124,6 +132,44 @@ class CollectionFragment : Fragment() {
         recyclerView.itemAnimator = DefaultItemAnimator()
 
         recyclerView.adapter = fastAdapter
+
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+
+            var mHasReachedBottomOnce = false
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if (RecyclerView.SCROLL_STATE_IDLE == newState) {
+
+                    // direction integers:
+                    // Negative distance for up,
+                    // Positive distance for down,
+                    // 0 will always return false.
+
+                    if (! recyclerView.canScrollVertically(16) &&! mHasReachedBottomOnce) {
+
+                        mHasReachedBottomOnce = true
+
+                        bottomFrame.visibility = View.INVISIBLE
+
+                    }
+
+                } else if (RecyclerView.SCROLL_STATE_DRAGGING == newState) {
+
+                    if (mHasReachedBottomOnce) {
+
+                        mHasReachedBottomOnce = false
+
+                        bottomFrame.visibility = View.VISIBLE
+
+                    }
+
+                }
+
+            }
+
+        })
 
     }
 
@@ -155,7 +201,7 @@ class CollectionFragment : Fragment() {
         @JvmStatic
         fun newInstance(actor: CollectionActor<CollectionActor.InMsg>) =
 
-            CollectionFragment().apply {
+            WrapCollectionFragment().apply {
 
                 this.actor = actor
 

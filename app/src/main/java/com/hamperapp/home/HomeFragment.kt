@@ -70,6 +70,18 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        dryCleaningBtn.setOnClickListener {
+
+            actor.send(HomeActor.InMsg.View.OnDryCleanClick)
+
+        }
+
+        washFoldBtn.setOnClickListener {
+
+            actor.send(HomeActor.InMsg.View.OnWashAndFoldClick)
+
+        }
+
         laundryBtn.setOnClickListener {
 
             actor.send(HomeActor.InMsg.View.OnLaundryClick)

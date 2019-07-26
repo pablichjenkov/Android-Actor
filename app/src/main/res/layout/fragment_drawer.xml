@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:openDrawer="end">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.hamperapp.ui.CustomToolbar
+        <com.hamperapp.ui.CustomActionBar
+            android:id="@+id/customActionBar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"/>
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"/>
 
         <FrameLayout
             android:id="@+id/drawerBox"
@@ -25,16 +27,31 @@
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
-        android:layout_width="wrap_content"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
-        android:layout_gravity="left">
+        android:layout_gravity="start">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/navigationRecycler"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:choiceMode="singleChoice"
-            tools:listitem="@android:layout/simple_list_item_2" />
+            android:layout_height="match_parent">
+
+            <include
+                android:id="@+id/drawerHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                layout="@layout/drawer_header"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/navigationRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toBottomOf="@+id/drawerHeader"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:choiceMode="singleChoice"
+                tools:listitem="@android:layout/simple_list_item_2" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.navigation.NavigationView>
 

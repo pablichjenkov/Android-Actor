@@ -1,4 +1,4 @@
-package com.hamperapp.launch
+package com.hamperapp.settings
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
@@ -7,10 +7,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class SplashActor(
+class SupportActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : Actor<SplashActor.InMsg>() {
+) : Actor<SupportActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
@@ -18,11 +18,11 @@ class SplashActor(
 	override fun start() {
 		super.start()
 
-		val titleMsg = UIActorMsg.SetTitle("Splash Screen")
+		val titleMsg = UIActorMsg.SetTitle("Support")
 
-		val splashFragment = SplashFragment.newInstance(this)
+		val supportFragment = SupportFragment.newInstance(this)
 
-		val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
+		val uiMsg = UIActorMsg.SetFragment(supportFragment, "supportFragment")
 
 		scope.launch {
 
@@ -38,19 +38,19 @@ class SplashActor(
 
         when (inMsg) {
 
-            InMsg.View.OnViewReady -> {
+			InMsg.View.OnViewReady -> {
 
                 scope.launch {
 
                     fragmentSink.send(OutMsg.View.OnLoad)
 
-                    delay(1000)
+                    delay(2000)
 
                     fragmentSink.send(OutMsg.View.OnSuccess)
 
-                    delay(500)
+                    delay(1000)
 
-                    observerChannel?.send(OutMsg.OnSplashComplete)
+                    observerChannel?.send(OutMsg.OnSettingsComplete)
 
                 }
 
@@ -66,7 +66,9 @@ class SplashActor(
 		super.back()
 
 		scope.launch {
+
 			uiSendChannel.send(UIActorMsg.BackResult(false))
+
 		}
 
 	}
@@ -86,7 +88,7 @@ class SplashActor(
 
     sealed class OutMsg {
 
-        object OnSplashComplete : OutMsg()
+        object OnSettingsComplete : OutMsg()
 
 
         sealed class View : OutMsg() {

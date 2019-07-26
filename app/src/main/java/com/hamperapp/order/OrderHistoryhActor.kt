@@ -1,4 +1,4 @@
-package com.hamperapp.launch
+package com.hamperapp.order
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
@@ -7,10 +7,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class SplashActor(
+class OrderHistoryhActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : Actor<SplashActor.InMsg>() {
+) : Actor<OrderHistoryhActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
@@ -18,11 +18,11 @@ class SplashActor(
 	override fun start() {
 		super.start()
 
-		val titleMsg = UIActorMsg.SetTitle("Splash Screen")
+		val titleMsg = UIActorMsg.SetTitle("Order History Screen")
 
-		val splashFragment = SplashFragment.newInstance(this)
+		val orderHistoryFragment = OrderHistoryFragment.newInstance(this)
 
-		val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
+		val uiMsg = UIActorMsg.SetFragment(orderHistoryFragment, "orderHistoryFragment")
 
 		scope.launch {
 
@@ -44,11 +44,11 @@ class SplashActor(
 
                     fragmentSink.send(OutMsg.View.OnLoad)
 
-                    delay(1000)
+                    delay(2000)
 
                     fragmentSink.send(OutMsg.View.OnSuccess)
 
-                    delay(500)
+                    delay(1000)
 
                     observerChannel?.send(OutMsg.OnSplashComplete)
 

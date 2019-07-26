@@ -1,4 +1,4 @@
-package com.hamperapp.launch
+package com.hamperapp.schedule
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
@@ -7,10 +7,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class SplashActor(
+class ScheduleActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : Actor<SplashActor.InMsg>() {
+) : Actor<ScheduleActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
@@ -18,11 +18,11 @@ class SplashActor(
 	override fun start() {
 		super.start()
 
-		val titleMsg = UIActorMsg.SetTitle("Splash Screen")
+		val titleMsg = UIActorMsg.SetTitle("Schedule Screen")
 
-		val splashFragment = SplashFragment.newInstance(this)
+		val scheduleFragment = ScheduleFragment.newInstance(this)
 
-		val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
+		val uiMsg = UIActorMsg.SetFragment(scheduleFragment, "scheduleFragment")
 
 		scope.launch {
 
@@ -38,23 +38,7 @@ class SplashActor(
 
         when (inMsg) {
 
-            InMsg.View.OnViewReady -> {
-
-                scope.launch {
-
-                    fragmentSink.send(OutMsg.View.OnLoad)
-
-                    delay(1000)
-
-                    fragmentSink.send(OutMsg.View.OnSuccess)
-
-                    delay(500)
-
-                    observerChannel?.send(OutMsg.OnSplashComplete)
-
-                }
-
-            }
+            InMsg.View.OnViewReady -> {}
 
             InMsg.View.OnViewStop -> {}
 
@@ -66,7 +50,9 @@ class SplashActor(
 		super.back()
 
 		scope.launch {
-			uiSendChannel.send(UIActorMsg.BackResult(false))
+
+			observerChannel?.send(OutMsg.OnScheduleCancel)
+
 		}
 
 	}
@@ -86,8 +72,9 @@ class SplashActor(
 
     sealed class OutMsg {
 
-        object OnSplashComplete : OutMsg()
+        object OnScheduleComplete : OutMsg()
 
+		object OnScheduleCancel : OutMsg()
 
         sealed class View : OutMsg() {
 

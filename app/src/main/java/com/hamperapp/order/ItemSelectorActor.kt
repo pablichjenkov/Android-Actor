@@ -1,4 +1,4 @@
-package com.hamperapp.laundry
+package com.hamperapp.order
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.collection.CollectionActor
@@ -21,6 +21,20 @@ class ItemSelectorActor(
 
 			InMsg.Test -> {}
 
+			CollectionActor.InMsg.View.OnBottomViewClick -> {
+
+				scope.launch {
+
+					observerChannel.send(
+						OutMsg.OnItemSelectionComplete(
+							ItemSelectionResult(null, true)
+						)
+					)
+
+				}
+
+			}
+
         }
 
     }
@@ -29,7 +43,7 @@ class ItemSelectorActor(
 
 		scope.launch {
 
-			observerChannel?.send(OutMsg.OnItemSelectionCancel)
+			observerChannel.send(OutMsg.OnItemSelectionCancel)
 
 		}
 
@@ -44,7 +58,7 @@ class ItemSelectorActor(
 
     sealed class OutMsg : CollectionActor.OutMsg() {
 
-        object OnItemSelectionComplete : OutMsg()
+        class OnItemSelectionComplete(val result: ItemSelectionResult) : OutMsg()
 
 		object OnItemSelectionCancel : OutMsg()
 

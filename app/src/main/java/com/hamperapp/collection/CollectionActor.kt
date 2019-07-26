@@ -19,7 +19,11 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
 
 		scope.launch {
 
-			val collectionFragment = CollectionFragment.newInstance(this@CollectionActor as CollectionActor<InMsg>)
+			//val collectionFragment = CollectionFragment.newInstance(this@CollectionActor as CollectionActor<InMsg>)
+
+			//val uiMsg = UIActorMsg.SetFragment(collectionFragment, "collectionFragment")
+
+			val collectionFragment = WrapCollectionFragment.newInstance(this@CollectionActor as CollectionActor<InMsg>)
 
 			val uiMsg = UIActorMsg.SetFragment(collectionFragment, "collectionFragment")
 
@@ -48,7 +52,7 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
 
             }
 
-            InMsg.View.OnViewStop -> {}
+			InMsg.View.OnViewStop -> {}
 
         }
 
@@ -60,6 +64,8 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
         open class View : InMsg() {
 
             object OnViewReady : View()
+
+			object OnBottomViewClick : View()
 
             object OnViewStop : View()
 

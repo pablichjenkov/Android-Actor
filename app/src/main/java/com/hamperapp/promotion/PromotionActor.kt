@@ -1,4 +1,4 @@
-package com.hamperapp.launch
+package com.hamperapp.promotion
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
@@ -7,10 +7,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class SplashActor(
+class PromotionActor(
     private var uiSendChannel: SendChannel<UIActorMsg>,
     private var observerChannel: SendChannel<OutMsg>?
-) : Actor<SplashActor.InMsg>() {
+) : Actor<PromotionActor.InMsg>() {
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
@@ -18,11 +18,11 @@ class SplashActor(
 	override fun start() {
 		super.start()
 
-		val titleMsg = UIActorMsg.SetTitle("Splash Screen")
+		val titleMsg = UIActorMsg.SetTitle("Referal Screen")
 
-		val splashFragment = SplashFragment.newInstance(this)
+		val promotionFragment = PromotionFragment.newInstance(this)
 
-		val uiMsg = UIActorMsg.SetFragment(splashFragment, "splashFragment")
+		val uiMsg = UIActorMsg.SetFragment(promotionFragment, "promotionFragment")
 
 		scope.launch {
 

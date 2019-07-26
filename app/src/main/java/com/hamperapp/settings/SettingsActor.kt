@@ -18,7 +18,7 @@ class SettingsActor(
 	override fun start() {
 		super.start()
 
-		val titleMsg = UIActorMsg.SetTitle("Settings Screen")
+		val titleMsg = UIActorMsg.SetTitle("Preference Screen")
 
 		val settingsFragment = SettingsFragment.newInstance(this)
 

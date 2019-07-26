@@ -2,7 +2,7 @@ package com.hamperapp.home
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
-import com.hamperapp.laundry.ItemSelectorActor
+import com.hamperapp.order.OrderWizardActor
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
@@ -14,18 +14,25 @@ class HomeActor(
     private var observerChannel: SendChannel<OutMsg>?
 ) : Actor<HomeActor.InMsg>() {
 
-
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
-	private var activeActor: Actor<*>? = null
+	private lateinit var dryCleaningOrderWizard: OrderWizardActor
 
-	private lateinit var itemSelectorActor: ItemSelectorActor
+	private lateinit var washFoldOrderWizard: OrderWizardActor
+
+	private lateinit var laundryOrderWizard: OrderWizardActor
+
+	private var activeActor: Actor<*>? = null
 
 
 	override fun start() {
 		super.start()
 
-		itemSelectorActor = ItemSelectorActor(uiSendChannel, createItemSelectorListener())
+		dryCleaningOrderWizard = OrderWizardActor(uiSendChannel, createLaundryOrderListener())
+
+		washFoldOrderWizard = OrderWizardActor(uiSendChannel, createLaundryOrderListener())
+
+		laundryOrderWizard = OrderWizardActor(uiSendChannel, createLaundryOrderListener())
 
 		showHomeItems()
 
@@ -39,9 +46,21 @@ class HomeActor(
 
             }
 
+			InMsg.View.OnDryCleanClick -> {
+
+				setActiveActor(dryCleaningOrderWizard)
+
+			}
+
+			InMsg.View.OnWashAndFoldClick -> {
+
+				setActiveActor(washFoldOrderWizard)
+
+			}
+
 			InMsg.View.OnLaundryClick -> {
 
-				setActiveActor(itemSelectorActor)
+				setActiveActor(laundryOrderWizard)
 
 			}
 
@@ -67,32 +86,19 @@ class HomeActor(
 
 	}
 
+	private fun setActiveActor(nextActor: Actor<*>?) {
 
-	private fun createItemSelectorListener() = scope.actor<ItemSelectorActor.OutMsg> {
+		scope.launch {
 
-		consumeEach { msg ->
+			activeActor?.stop()
 
-			when (msg) {
+			nextActor?.start()
 
-				ItemSelectorActor.OutMsg.OnItemSelectionComplete -> {
-
-					showHomeItems()
-
-				}
-
-				ItemSelectorActor.OutMsg.OnItemSelectionCancel -> {
-
-					showHomeItems()
-
-				}
-
-			}
+			activeActor = nextActor
 
 		}
 
 	}
-
-
 
 	private fun showHomeItems() {
 
@@ -114,16 +120,25 @@ class HomeActor(
 
 	}
 
-	private fun setActiveActor(nextActor: Actor<*>?) {
+	private fun createLaundryOrderListener() = scope.actor<OrderWizardActor.OutMsg> {
 
-		scope.launch {
+		consumeEach { msg ->
 
-			activeActor?.stop()
+			when (msg) {
 
-			nextActor?.start()
+				OrderWizardActor.OutMsg.OnOrderComplete -> {
 
-			activeActor = nextActor
+					showHomeItems()
 
+				}
+
+				OrderWizardActor.OutMsg.OnOrderCancelled -> {
+
+					showHomeItems()
+
+				}
+
+			}
 
 		}
 
@@ -139,14 +154,15 @@ class HomeActor(
 
 			object OnLaundryClick : View()
 
+			object OnDryCleanClick : View()
+
+			object OnWashAndFoldClick : View()
+
         }
 
     }
 
     sealed class OutMsg {
-
-        object OnHomeComplete : OutMsg()
-
 
         sealed class View : OutMsg() {
 

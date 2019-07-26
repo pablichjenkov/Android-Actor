@@ -4,7 +4,10 @@ import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
 import com.hamperapp.home.HomeActor
 import com.hamperapp.launch.SplashActor
+import com.hamperapp.order.OrderHistoryhActor
+import com.hamperapp.promotion.PromotionActor
 import com.hamperapp.settings.SettingsActor
+import com.hamperapp.settings.SupportActor
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
@@ -60,13 +63,19 @@ class NavigationActor(
 
                     childrenActors = mutableListOf(
                         createHomeActor(this),
-                        createSplashActor(this),
-                        createSettingsActor(this)
+                        createReferFriendActor(this),
+                        createOrderHistoryActor(this),
+                        createSettingsActor(this),
+                        createSupportActor(this)
                     )
 
-                    val menuItems: List<String> = childrenActors.map {
-                        it.javaClass.simpleName
-                    }
+                    val menuItems: List<String> = listOf(
+                        "HOME",
+                        "REFER A FRIEND",
+                        "MY ORDERS",
+                        "MY PREFERENCES",
+                        "SUPPORT"
+                    )
 
                     scope.launch {
 
@@ -109,7 +118,9 @@ class NavigationActor(
 
                     is UIActorMsg.SetTitle -> {
 
-                        parentUISendChannel.send(uiMsg)
+                        //parentUISendChannel.send(uiMsg)
+
+                        fragmentSink.send(uiMsg)
 
                     }
 
@@ -167,9 +178,18 @@ class NavigationActor(
 
     }
 
-    private fun createSplashActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
+    private fun createReferFriendActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
-        return SplashActor(
+        return PromotionActor(
+            uiSendChannel,
+            null
+        )
+
+    }
+
+    private fun createOrderHistoryActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
+
+        return OrderHistoryhActor(
             uiSendChannel,
             null
         )
@@ -179,6 +199,15 @@ class NavigationActor(
     private fun createSettingsActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
 
         return SettingsActor(
+            uiSendChannel,
+            null
+        )
+
+    }
+
+    private fun createSupportActor(uiSendChannel: SendChannel<UIActorMsg>): Actor<*> {
+
+        return SupportActor(
             uiSendChannel,
             null
         )

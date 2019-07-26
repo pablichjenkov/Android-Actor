@@ -5,13 +5,16 @@
     android:layout_height="match_parent">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/laundryBtn"
+        android:id="@+id/dryCleaningBtn"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="4dp"
-        android:background="@color/colorAccent"
         android:gravity="center"
-        android:text="Laundry"
+        android:text="Dry Cleaning"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_white_1000"
+        android:background="@drawable/img_dry_cleaning"
         app:layout_constraintBottom_toTopOf="@+id/topGuideline"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -25,14 +28,17 @@
         app:layout_constraintGuide_percent="0.33" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/dryCleaningBtn"
+        android:id="@+id/washFoldBtn"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/img_wash_fold"
         android:gravity="center"
-        android:text="Dry Cleaning"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_white_1000"
+        android:text="Wash and Fold"
         app:layout_constraintBottom_toBottomOf="@+id/bottomGuideline"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -46,13 +52,16 @@
         app:layout_constraintGuide_percent="0.66" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/goodsBtn"
+        android:id="@+id/laundryBtn"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="4dp"
-        android:background="@color/colorPrimaryDark"
+        android:background="@drawable/img_laundry"
         android:gravity="center"
-        android:text="Goods"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_white_1000"
+        android:text="Laundry"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
