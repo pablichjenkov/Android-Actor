@@ -16,11 +16,11 @@ class HomeActor(
 
 	lateinit var fragmentSink: SendChannel<OutMsg.View>
 
-	private lateinit var dryCleaningOrderWizard: OrderWizardActor
+	private var dryCleaningOrderWizard = OrderWizardActor(uiSendChannel)
 
-	private lateinit var washFoldOrderWizard: OrderWizardActor
+	private var washFoldOrderWizard = OrderWizardActor(uiSendChannel)
 
-	private lateinit var laundryOrderWizard: OrderWizardActor
+	private var laundryOrderWizard = OrderWizardActor(uiSendChannel)
 
 	private var activeActor: Actor<*>? = null
 
@@ -28,11 +28,11 @@ class HomeActor(
 	override fun start() {
 		super.start()
 
-		dryCleaningOrderWizard = OrderWizardActor(uiSendChannel, createLaundryOrderListener())
+		dryCleaningOrderWizard.parentChannel = createLaundryOrderListener()
 
-		washFoldOrderWizard = OrderWizardActor(uiSendChannel, createLaundryOrderListener())
+		washFoldOrderWizard.parentChannel = createLaundryOrderListener()
 
-		laundryOrderWizard = OrderWizardActor(uiSendChannel, createLaundryOrderListener())
+		laundryOrderWizard.parentChannel = createLaundryOrderListener()
 
 		showHomeItems()
 

@@ -4,11 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hamperapp.R
 import com.mikepenz.fastadapter.FastAdapter
@@ -17,18 +15,17 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.select.getSelectExtension
 import kotlinx.android.synthetic.main.fragment_collection.recyclerView
 import kotlinx.android.synthetic.main.fragment_top_bottom_wrap_collection.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
-import java.util.ArrayList
+import java.util.*
 
 
 class WrapCollectionFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
-
-    private lateinit var mailboxChannel: SendChannel<CollectionActor.OutMsg.View>
 
     private lateinit var actor: CollectionActor<CollectionActor.InMsg>
 
@@ -39,10 +36,30 @@ class WrapCollectionFragment : Fragment() {
     private lateinit var fastAdapter: FastAdapter<GenericItem>
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_top_bottom_wrap_collection, container, false)
+    }
 
-        mailboxChannel = fragmentCoroutineScope.actor {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupAdapter()
+
+        bottomFrame.setOnClickListener {
+
+            actor.send(CollectionActor.InMsg.View.OnBottomViewClick)
+
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        actor.fragmentChannel = fragmentCoroutineScope.actor {
 
             consumeEach { event ->
 
@@ -67,33 +84,6 @@ class WrapCollectionFragment : Fragment() {
             }
 
         }
-
-        actor.fragmentSink = mailboxChannel
-
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_top_bottom_wrap_collection, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupAdapter()
-
-        bottomFrame.setOnClickListener {
-
-            actor.send(CollectionActor.InMsg.View.OnBottomViewClick)
-
-        }
-
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         actor.send(CollectionActor.InMsg.View.OnViewReady)
 

@@ -10,7 +10,7 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
     protected var uiSendChannel: SendChannel<UIActorMsg>
 ) : Actor<T>() {
 
-	lateinit var fragmentSink: SendChannel<OutMsg.View>
+	lateinit var fragmentChannel: SendChannel<OutMsg.View>
 
 	protected open var title: String = "Collection Fragment"
 
@@ -46,7 +46,7 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
 
                 scope.launch {
 
-					fragmentSink.send(OutMsg.View.OnSuccess)
+					fragmentChannel.send(OutMsg.View.OnSuccess)
 
                 }
 

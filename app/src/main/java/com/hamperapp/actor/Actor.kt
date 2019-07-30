@@ -13,7 +13,7 @@ abstract class Actor<in T> {
 
 	protected var scope = CoroutineScope(Dispatchers.IO + job)
 
-	private var actorInputChannel: SendChannel<T>? = null
+	private var inputChannel: SendChannel<T>? = null
 
 	private var isStarted: AtomicBoolean = AtomicBoolean(false)
 
@@ -32,7 +32,7 @@ abstract class Actor<in T> {
 
 		scope.launch {
 
-			actorInputChannel?.send(inMsg)
+			inputChannel?.send(inMsg)
 
 		}
 
@@ -56,7 +56,7 @@ abstract class Actor<in T> {
 
 		onClose()
 
-		actorInputChannel?.close()
+		inputChannel?.close()
 
 		scope.cancel()
 
@@ -64,7 +64,7 @@ abstract class Actor<in T> {
 
 	private fun startCoroutineActor() {
 
-		actorInputChannel = scope.actor {
+		inputChannel = scope.actor {
 
 			consumeEach { msg ->
 

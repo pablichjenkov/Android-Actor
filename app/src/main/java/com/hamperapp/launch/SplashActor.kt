@@ -3,16 +3,18 @@ package com.hamperapp.launch
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 class SplashActor(
-    private var uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>?
+    private var uiSendChannel: SendChannel<UIActorMsg>
 ) : Actor<SplashActor.InMsg>() {
 
-	lateinit var fragmentSink: SendChannel<OutMsg.View>
+	lateinit var parentChannel: SendChannel<OutMsg>
+
+	lateinit var fragmentChannel: SendChannel<OutMsg.View>
 
 
 	override fun start() {
@@ -42,15 +44,15 @@ class SplashActor(
 
                 scope.launch {
 
-                    fragmentSink.send(OutMsg.View.OnLoad)
+					fragmentChannel.send(OutMsg.View.OnLoad)
 
                     delay(1000)
 
-                    fragmentSink.send(OutMsg.View.OnSuccess)
+					fragmentChannel.send(OutMsg.View.OnSuccess)
 
                     delay(500)
 
-                    observerChannel?.send(OutMsg.OnSplashComplete)
+					parentChannel.send(OutMsg.OnSplashComplete)
 
                 }
 

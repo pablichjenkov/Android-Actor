@@ -19,51 +19,13 @@ class HomeFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var mailboxChannel: SendChannel<HomeActor.OutMsg.View>
-
-
     private lateinit var actor: HomeActor
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        mailboxChannel = fragmentCoroutineScope.actor {
-
-            consumeEach { event ->
-
-                when (event) {
-
-                    HomeActor.OutMsg.View.OnLoad -> {
-
-
-                    }
-
-                    HomeActor.OutMsg.View.OnSuccess -> {
-
-
-                    }
-
-                    HomeActor.OutMsg.View.OnError -> {
-
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        actor.fragmentSink = mailboxChannel
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -92,6 +54,33 @@ class HomeFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+
+        actor.fragmentSink = fragmentCoroutineScope.actor {
+
+            consumeEach { event ->
+
+                when (event) {
+
+                    HomeActor.OutMsg.View.OnLoad -> {
+
+
+                    }
+
+                    HomeActor.OutMsg.View.OnSuccess -> {
+
+
+                    }
+
+                    HomeActor.OutMsg.View.OnError -> {
+
+
+                    }
+
+                }
+
+            }
+
+        }
 
         actor.send(HomeActor.InMsg.View.OnViewReady)
 

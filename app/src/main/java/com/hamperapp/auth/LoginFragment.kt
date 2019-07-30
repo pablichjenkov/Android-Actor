@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import com.hamperapp.R
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 
@@ -18,15 +17,41 @@ class LoginFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var mailboxChannel: SendChannel<AuthPresenterActor.OutMsg>
-
     private lateinit var actor: AuthPresenterActor
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_login, container, false)
+    }
 
-        mailboxChannel = fragmentCoroutineScope.actor {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        loginBtn.setOnClickListener {
+
+            actor.send(
+                AuthPresenterActor.InMsg.View.DoLogin(
+                    username.text.toString(),
+                    password.text.toString()
+                ))
+
+        }
+
+        signupBtn.setOnClickListener {
+
+            actor.send(AuthPresenterActor.InMsg.View.ShowSignUp)
+
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        actor.fragmentChannel = fragmentCoroutineScope.actor {
 
             consumeEach { event: Any ->
 
@@ -58,42 +83,6 @@ class LoginFragment : Fragment() {
 
         }
 
-        actor.fragmentSink = mailboxChannel
-
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        return inflater.inflate(R.layout.fragment_login, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        loginBtn.setOnClickListener {
-
-            actor.send(
-                AuthPresenterActor.InMsg.View.DoLogin(
-                    username.text.toString(),
-                    password.text.toString()
-                ))
-
-        }
-
-        signupBtn.setOnClickListener {
-
-            actor.send(AuthPresenterActor.InMsg.View.ShowSignUp)
-
-        }
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-
         actor.send(AuthPresenterActor.InMsg.View.OnLoginViewReady)
 
     }
@@ -101,11 +90,9 @@ class LoginFragment : Fragment() {
     override fun onStop() {
         super.onStop()
 
-        if (fragmentCoroutineScope.isActive) {
+        actor.send(AuthPresenterActor.InMsg.View.OnLoginViewStop)
 
-            fragmentCoroutineScope.cancel()
-
-        }
+        fragmentCoroutineScope.coroutineContext.cancelChildren()
     }
 
     companion object {

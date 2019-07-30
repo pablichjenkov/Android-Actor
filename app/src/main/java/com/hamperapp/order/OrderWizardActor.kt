@@ -12,17 +12,18 @@ import java.util.*
 
 
 class OrderWizardActor(
-    private var uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>?
+    private var uiSendChannel: SendChannel<UIActorMsg>
 ) : Actor<OrderWizardActor.InMsg>() {
 
-	private lateinit var itemSelectorActor: ItemSelectorActor
+	lateinit var parentChannel: SendChannel<OutMsg>
 
-	private lateinit var cartActor: CartActor
+	private var itemSelectorActor = ItemSelectorActor(uiSendChannel)
 
-	private lateinit var scheduleActor: ScheduleActor
+	private var cartActor = CartActor(uiSendChannel)
 
-	private lateinit var paymentActor: PaymentActor
+	private var scheduleActor = ScheduleActor(uiSendChannel)
+
+	private var paymentActor = PaymentActor(uiSendChannel)
 
 	private var activeActor: Actor<*>? = null
 
@@ -32,15 +33,23 @@ class OrderWizardActor(
 	override fun start() {
 		super.start()
 
-		itemSelectorActor = ItemSelectorActor(uiSendChannel, createItemSelectorListener())
+		itemSelectorActor.parentChannel = createItemSelectorListener()
 
-		cartActor = CartActor(uiSendChannel, createCartListener())
+		cartActor.parentChannel = createCartListener()
 
-		scheduleActor = ScheduleActor(uiSendChannel, createScheduleListener())
+		scheduleActor.parentChannel = createScheduleListener()
 
-		paymentActor = PaymentActor(uiSendChannel, createPaymentListener())
+		paymentActor.parentChannel = createPaymentListener()
 
-		pushActor(itemSelectorActor)
+		if (activeActor == null) {
+
+			pushActor(itemSelectorActor)
+
+		} else {
+
+			activeActor?.start()
+
+		}
 
 	}
 
@@ -60,7 +69,7 @@ class OrderWizardActor(
 
 			scope.launch {
 
-				observerChannel?.send(OutMsg.OnOrderCancelled)
+				parentChannel.send(OutMsg.OnOrderCancelled)
 
 			}
 		}
@@ -91,7 +100,7 @@ class OrderWizardActor(
 
 			scope.launch {
 
-				observerChannel?.send(OutMsg.OnOrderCancelled)
+				parentChannel.send(OutMsg.OnOrderCancelled)
 
 			}
 
@@ -135,7 +144,9 @@ class OrderWizardActor(
 
 				ItemSelectorActor.OutMsg.OnItemSelectionCancel -> {
 
-					observerChannel?.send(OutMsg.OnOrderCancelled)
+					parentChannel.send(OutMsg.OnOrderCancelled)
+
+					activeActor = null
 
 				}
 

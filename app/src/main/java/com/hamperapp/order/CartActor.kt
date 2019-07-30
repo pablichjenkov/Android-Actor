@@ -7,11 +7,12 @@ import kotlinx.coroutines.launch
 
 
 class CartActor(
-    uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>
+    uiSendChannel: SendChannel<UIActorMsg>
 ) : CollectionActor<CollectionActor.InMsg>(uiSendChannel) {
 
 	override var title = "Cart"
+
+	lateinit var parentChannel: SendChannel<OutMsg>
 
 
     override fun onAction(inMsg: CollectionActor.InMsg) {
@@ -25,7 +26,7 @@ class CartActor(
 
 				scope.launch {
 
-					observerChannel.send(
+					parentChannel.send(
 						OutMsg.OnCartComplete(
 							CartResult(true)
 						)
@@ -43,7 +44,7 @@ class CartActor(
 
 		scope.launch {
 
-			observerChannel.send(OutMsg.OnCartCancel)
+			parentChannel.send(OutMsg.OnCartCancel)
 
 		}
 

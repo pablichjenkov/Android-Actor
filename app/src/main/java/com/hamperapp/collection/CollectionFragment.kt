@@ -26,8 +26,6 @@ class CollectionFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var mailboxChannel: SendChannel<CollectionActor.OutMsg.View>
-
     private lateinit var actor: CollectionActor<CollectionActor.InMsg>
 
     private lateinit var headerAdapter: ItemAdapter<GenericItem>
@@ -37,10 +35,23 @@ class CollectionFragment : Fragment() {
     private lateinit var fastAdapter: FastAdapter<GenericItem>
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_collection, container, false)
+    }
 
-        mailboxChannel = fragmentCoroutineScope.actor {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupAdapter()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        actor.fragmentChannel = fragmentCoroutineScope.actor {
 
             consumeEach { event ->
 
@@ -65,26 +76,6 @@ class CollectionFragment : Fragment() {
             }
 
         }
-
-        actor.fragmentSink = mailboxChannel
-
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_collection, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupAdapter()
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         actor.send(CollectionActor.InMsg.View.OnViewReady)
 

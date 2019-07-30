@@ -1,9 +1,9 @@
 package com.hamperapp.navigation
 
+import android.widget.Toast
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
 import com.hamperapp.home.HomeActor
-import com.hamperapp.launch.SplashActor
 import com.hamperapp.order.OrderHistoryhActor
 import com.hamperapp.promotion.PromotionActor
 import com.hamperapp.settings.SettingsActor
@@ -16,8 +16,7 @@ import kotlinx.coroutines.launch
 
 
 class NavigationActor(
-    private var parentUISendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>?
+    private var parentUISendChannel: SendChannel<UIActorMsg>
 ) : Actor<NavigationActor.InMsg>() {
 
 
@@ -29,7 +28,9 @@ class NavigationActor(
 
     private lateinit var defaultActor: Actor<*>
 
-    lateinit var fragmentSink: SendChannel<UIActorMsg>
+    var parentChannel: SendChannel<OutMsg>? = null
+
+    lateinit var fragmentChannel: SendChannel<UIActorMsg>
 
 
     override fun start() {
@@ -57,6 +58,8 @@ class NavigationActor(
 
             InMsg.View.OnViewReady -> {
 
+                if (activeActor != null) return
+
                 createUiActor()
 
                 uiSendChannel?.run {
@@ -79,7 +82,7 @@ class NavigationActor(
 
                     scope.launch {
 
-                        fragmentSink.send(UIActorMsg.ShowNavigation(menuItems))
+                        fragmentChannel.send(UIActorMsg.ShowNavigation(menuItems))
 
                     }
 
@@ -120,19 +123,25 @@ class NavigationActor(
 
                         //parentUISendChannel.send(uiMsg)
 
-                        fragmentSink.send(uiMsg)
+                        fragmentChannel.send(uiMsg)
 
                     }
 
                     is UIActorMsg.SetFragment -> {
 
-                        fragmentSink.send(uiMsg)
+                        fragmentChannel.send(uiMsg)
 
                     }
 
                     is UIActorMsg.SetView -> {
 
-                        fragmentSink.send(uiMsg)
+                        fragmentChannel.send(uiMsg)
+
+                    }
+
+                    is UIActorMsg.Toast -> {
+
+                        fragmentChannel.send(uiMsg)
 
                     }
 
@@ -140,13 +149,13 @@ class NavigationActor(
 
                         if (activeActor == defaultActor) {
 
+                            activeActor = null
+
                             scope.launch {
 
                                 closeChildrenActor()
 
-                                observerChannel?.send(OutMsg.OnDrawerComplete)
-
-                                cancel()
+                                parentChannel?.send(OutMsg.OnDrawerComplete)
 
                             }
 

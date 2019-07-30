@@ -3,16 +3,16 @@ package com.hamperapp.schedule
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
 class ScheduleActor(
-    private var uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>?
+    private var uiSendChannel: SendChannel<UIActorMsg>
 ) : Actor<ScheduleActor.InMsg>() {
 
-	lateinit var fragmentSink: SendChannel<OutMsg.View>
+	lateinit var parentChannel: SendChannel<OutMsg>
+
+	lateinit var fragmentChannel: SendChannel<OutMsg.View>
 
 
 	override fun start() {
@@ -40,6 +40,16 @@ class ScheduleActor(
 
             InMsg.View.OnViewReady -> {}
 
+			InMsg.View.OnNextClick -> {
+
+				scope.launch {
+
+					parentChannel.send(OutMsg.OnScheduleComplete)
+
+				}
+
+			}
+
             InMsg.View.OnViewStop -> {}
 
         }
@@ -51,7 +61,7 @@ class ScheduleActor(
 
 		scope.launch {
 
-			observerChannel?.send(OutMsg.OnScheduleCancel)
+			parentChannel.send(OutMsg.OnScheduleCancel)
 
 		}
 
@@ -63,6 +73,8 @@ class ScheduleActor(
         sealed class View : InMsg() {
 
             object OnViewReady : View()
+
+			object OnNextClick : View()
 
             object OnViewStop : View()
 

@@ -2,7 +2,6 @@ package com.hamperapp.auth
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -10,8 +9,7 @@ import kotlinx.coroutines.launch
 
 class AuthPresenterActor(
     private var authActor: AuthActor,
-    private var uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>
+    private var uiSendChannel: SendChannel<UIActorMsg>
 ): Actor<AuthPresenterActor.InMsg>() {
 
     enum class Stage {
@@ -21,7 +19,9 @@ class AuthPresenterActor(
 
     private var stage = Stage.Login
 
-    lateinit var fragmentSink: SendChannel<OutMsg.View>
+    lateinit var parentChannel: SendChannel<OutMsg>
+
+    lateinit var fragmentChannel: SendChannel<OutMsg.View>
 
 
     override fun start() {
@@ -47,15 +47,15 @@ class AuthPresenterActor(
 
                 scope.launch {
 
-                    fragmentSink.send(OutMsg.View.OnLoad)
-
-                    delay(2000)
-
-                    fragmentSink.send(OutMsg.View.OnSuccess)
+                    fragmentChannel.send(OutMsg.View.OnLoad)
 
                     delay(1000)
 
-                    observerChannel?.send(OutMsg.AuthSuccess("SUCCESS_TOKEN"))
+                    fragmentChannel.send(OutMsg.View.OnSuccess)
+
+                    delay(500)
+
+                    parentChannel.send(OutMsg.AuthSuccess("SUCCESS_TOKEN"))
 
                 }
 
@@ -63,17 +63,13 @@ class AuthPresenterActor(
 
             InMsg.View.ShowSignUp -> { showSignup() }
 
-            InMsg.View.OnLoginViewStop -> {
-                scope.coroutineContext.cancelChildren()
-            }
+            InMsg.View.OnLoginViewStop -> {}
 
             InMsg.View.OnSignupViewReady -> {}
 
             InMsg.View.DoSignUp -> {}
 
-            InMsg.View.OnSignupViewStop -> {
-                scope.coroutineContext.cancelChildren()
-            }
+            InMsg.View.OnSignupViewStop -> {}
 
         }
 
@@ -131,7 +127,7 @@ class AuthPresenterActor(
 
                 scope.launch {
 
-                    observerChannel?.send(OutMsg.AuthError("Back Pressed Cancelled"))
+                    parentChannel.send(OutMsg.AuthError("Back Pressed Cancelled"))
 
                 }
 

@@ -7,11 +7,12 @@ import kotlinx.coroutines.launch
 
 
 class ItemSelectorActor(
-    uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>
+    uiSendChannel: SendChannel<UIActorMsg>
 ) : CollectionActor<CollectionActor.InMsg>(uiSendChannel) {
 
 	override var title = "Laundry Items Selection"
+
+	lateinit var parentChannel: SendChannel<OutMsg>
 
 
     override fun onAction(inMsg: CollectionActor.InMsg) {
@@ -25,7 +26,7 @@ class ItemSelectorActor(
 
 				scope.launch {
 
-					observerChannel.send(
+					parentChannel.send(
 						OutMsg.OnItemSelectionComplete(
 							ItemSelectionResult(null, true)
 						)
@@ -43,7 +44,7 @@ class ItemSelectorActor(
 
 		scope.launch {
 
-			observerChannel.send(OutMsg.OnItemSelectionCancel)
+			parentChannel.send(OutMsg.OnItemSelectionCancel)
 
 		}
 

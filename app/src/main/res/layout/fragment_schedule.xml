@@ -17,4 +17,12 @@
         android:layout_gravity="center"
         android:visibility="gone"/>
 
+    <Button
+        android:id="@+id/next"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:text="Next"/>
+
+
 </FrameLayout>

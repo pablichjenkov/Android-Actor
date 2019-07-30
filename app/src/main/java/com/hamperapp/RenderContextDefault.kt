@@ -18,14 +18,19 @@ class RenderContextDefault(
     override fun <F : Fragment> setView(fragment: F, fragmentId: String) {
 
         val fragmentTransaction = fragmentManager.beginTransaction()
+
         fragmentTransaction.replace(viewContainerId, fragment, fragmentId)
+
         fragmentTransaction.commitNow()
 
     }
 
     override fun <V : View> setView(view: V) {
+
         viewContainer.removeAllViews()
+
         viewContainer.addView(view)
+
     }
 
 }

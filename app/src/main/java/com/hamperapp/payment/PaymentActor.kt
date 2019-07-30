@@ -7,11 +7,12 @@ import kotlinx.coroutines.launch
 
 
 class PaymentActor(
-    uiSendChannel: SendChannel<UIActorMsg>,
-    private var observerChannel: SendChannel<OutMsg>
+    uiSendChannel: SendChannel<UIActorMsg>
 ) : CollectionActor<CollectionActor.InMsg>(uiSendChannel) {
 
-	override var title = "Laundry Items Selection"
+	override var title = "Payment Screen"
+
+	lateinit var parentChannel: SendChannel<OutMsg>
 
 
     override fun onAction(inMsg: CollectionActor.InMsg) {
@@ -25,7 +26,7 @@ class PaymentActor(
 
 				scope.launch {
 
-					observerChannel.send(
+					parentChannel.send(
 						OutMsg.OnPaymentComplete(
 							PaymentResult()
 						)
@@ -43,7 +44,7 @@ class PaymentActor(
 
 		scope.launch {
 
-			observerChannel.send(OutMsg.OnPaymentCancel)
+			parentChannel.send(OutMsg.OnPaymentCancel)
 
 		}
 

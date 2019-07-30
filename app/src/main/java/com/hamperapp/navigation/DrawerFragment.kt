@@ -24,8 +24,6 @@ class DrawerFragment : Fragment() {
 
 	private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-	private lateinit var mailboxChannel: SendChannel<UIActorMsg>
-
 	private lateinit var actor: NavigationActor
 
 	private lateinit var renderBox: RenderContextDefault
@@ -33,10 +31,32 @@ class DrawerFragment : Fragment() {
 	private lateinit var drawerAdapter: DrawerAdapter
 
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View? {
+		return inflater.inflate(R.layout.fragment_drawer, container, false)
+	}
 
-		mailboxChannel = fragmentCoroutineScope.actor {
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+
+		renderBox = RenderContextDefault(childFragmentManager, drawerBox)
+
+		customActionBar.setObserver {
+
+			onLeftIconTap = { drawerLayout.toggle(navigationView) }
+
+			onRightIconTap = {}
+
+		}
+
+	}
+
+	override fun onStart() {
+		super.onStart()
+
+		actor.fragmentChannel = fragmentCoroutineScope.actor {
 
 			consumeEach { msg ->
 
@@ -77,36 +97,6 @@ class DrawerFragment : Fragment() {
 			}
 
 		}
-
-		actor.fragmentSink = mailboxChannel
-
-	}
-
-	override fun onCreateView(
-		inflater: LayoutInflater, container: ViewGroup?,
-		savedInstanceState: Bundle?
-	): View? {
-
-		return inflater.inflate(R.layout.fragment_drawer, container, false)
-	}
-
-	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-		super.onViewCreated(view, savedInstanceState)
-
-		renderBox = RenderContextDefault(childFragmentManager, drawerBox)
-
-		customActionBar.setObserver {
-
-			onLeftIconTap = { drawerLayout.toggle(navigationView) }
-
-			onRightIconTap = {}
-
-		}
-
-	}
-
-	override fun onStart() {
-		super.onStart()
 
 		actor.send(NavigationActor.InMsg.View.OnViewReady)
 

@@ -6,9 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.hamperapp.R
-import kotlinx.android.synthetic.main.fragment_splash.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.android.synthetic.main.fragment_schedule.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 
@@ -17,15 +18,31 @@ class ScheduleFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var mailboxChannel: SendChannel<ScheduleActor.OutMsg.View>
-
     private lateinit var actor: ScheduleActor
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_schedule, container, false)
+    }
 
-        mailboxChannel = fragmentCoroutineScope.actor {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        next.setOnClickListener {
+
+            actor.send(ScheduleActor.InMsg.View.OnNextClick)
+
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        actor.fragmentChannel = fragmentCoroutineScope.actor {
 
             consumeEach { event ->
 
@@ -54,21 +71,6 @@ class ScheduleFragment : Fragment() {
             }
 
         }
-
-        actor.fragmentSink = mailboxChannel
-
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        return inflater.inflate(R.layout.fragment_schedule, container, false)
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         actor.send(ScheduleActor.InMsg.View.OnViewReady)
 
