@@ -13,11 +13,12 @@ class AuthPresenterActor(
 ): Actor<AuthPresenterActor.InMsg>() {
 
     enum class Stage {
+        Select,
         Login,
         Signup
     }
 
-    private var stage = Stage.Login
+    private var stage = Stage.Select
 
     lateinit var parentChannel: SendChannel<OutMsg>
 
@@ -28,6 +29,8 @@ class AuthPresenterActor(
         super.start()
 
         when (stage) {
+
+            Stage.Select -> showSelect()
 
             Stage.Login -> showLogin()
 
@@ -40,6 +43,12 @@ class AuthPresenterActor(
     override fun onAction(inMsg: InMsg) {
 
         when (inMsg) {
+
+            InMsg.View.OnSelectAuthViewReady -> {}
+
+            InMsg.View.OnSelectAuthViewStop -> {}
+
+            InMsg.View.ShowLogin -> { showLogin() }
 
             InMsg.View.OnLoginViewReady -> {}
 
@@ -61,9 +70,9 @@ class AuthPresenterActor(
 
             }
 
-            InMsg.View.ShowSignUp -> { showSignup() }
-
             InMsg.View.OnLoginViewStop -> {}
+
+            InMsg.View.ShowSignUp -> { showSignup() }
 
             InMsg.View.OnSignupViewReady -> {}
 
@@ -79,6 +88,21 @@ class AuthPresenterActor(
         super.back()
 
         onBackPressed()
+    }
+
+    private fun showSelect() {
+
+        val selectAuthFragment = SelectAuthFragment.newInstance(this)
+
+        val uiMsg = UIActorMsg.SetFragment(selectAuthFragment, "selectAuthFragment")
+
+        scope.launch {
+
+            uiSendChannel.send(uiMsg)
+
+            stage = Stage.Select
+        }
+
     }
 
     private fun showLogin() {
@@ -123,7 +147,7 @@ class AuthPresenterActor(
 
         when (stage) {
 
-            Stage.Login -> {
+            Stage.Select -> {
 
                 scope.launch {
 
@@ -133,7 +157,9 @@ class AuthPresenterActor(
 
             }
 
-            Stage.Signup -> { showLogin() }
+            Stage.Login -> { showSelect() }
+
+            Stage.Signup -> { showSelect() }
 
         }
 
@@ -142,6 +168,12 @@ class AuthPresenterActor(
     sealed class InMsg {
 
         sealed class View : InMsg() {
+
+            object OnSelectAuthViewReady : View()
+
+            object OnSelectAuthViewStop : View()
+
+            object ShowLogin : View()
 
             object OnLoginViewReady : View()
 

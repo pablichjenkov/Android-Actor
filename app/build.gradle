@@ -67,6 +67,8 @@ dependencies {
     // The tiny Materialize library used for its useful helper classes
     implementation 'com.mikepenz:materialize:1.2.1'
 
+    // UI
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.17'
 
     // Local jars
     implementation fileTree(dir: 'libs', include: ['*.jar'])

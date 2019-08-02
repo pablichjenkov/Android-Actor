@@ -1,40 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".launch.SplashFragment">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/topGuideline"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fbLoginBtn"
+        android:layout_width="200dp"
+        android:layout_height="56dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="56dp"
+        app:cornerRadius="16dp"
+        android:backgroundTint="@color/md_indigo_800"
+        android:textColor="@color/md_white_1000"
+        android:textSize="12sp"
+        android:textAllCaps="false"
+        android:text="Connect with Facebook"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/separatorLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.3" />
+        app:layout_constraintTop_toBottomOf="@+id/fbLoginBtn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:padding="8dp"
+        android:textSize="12sp"
+        android:textStyle="normal"
+        android:textAllCaps="false"
+        android:text="or continue with email"/>
 
     <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/username"
+        android:id="@+id/firstName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/topGuideline"
-        android:hint="Username"/>
+        app:layout_constraintTop_toBottomOf="@+id/separatorLabel"
+        android:hint="First Name"/>
 
     <androidx.appcompat.widget.AppCompatEditText
-        android:id="@+id/password"
+        android:id="@+id/lastName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/username"
-        android:hint="Password"/>
+        app:layout_constraintTop_toBottomOf="@+id/firstName"
+        android:hint="Last Name"/>
 
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/password"
+        app:layout_constraintTop_toBottomOf="@+id/lastName"
         android:hint="Email"/>
 
     <androidx.appcompat.widget.AppCompatEditText
@@ -45,14 +64,42 @@
         app:layout_constraintTop_toBottomOf="@+id/email"
         android:hint="Phone"/>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/signupBtn"
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
         app:layout_constraintTop_toBottomOf="@+id/phone"
+        android:hint="Password"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/termsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/password"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:text="Sign up"/>
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:textSize="12sp"
+        android:textStyle="normal"
+        android:textAllCaps="false"
+        android:text="By signing up, you agree to our Terms and Conditions Agreement\nPrivacy Statement"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/signupBtn"
+        android:layout_width="200dp"
+        android:layout_height="56dp"
+        android:layout_margin="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/termsLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:cornerRadius="16dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/md_white_1000"
+        android:textSize="12sp"
+        android:textAllCaps="false"
+        android:text="Create Account"/>
 
     <ProgressBar
         android:id="@+id/progressBar"
