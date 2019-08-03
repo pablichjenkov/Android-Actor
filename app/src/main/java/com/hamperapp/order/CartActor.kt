@@ -22,19 +22,6 @@ class CartActor(
 
 			InMsg.Test -> {}
 
-			CollectionActor.InMsg.View.OnBottomViewClick -> {
-
-				scope.launch {
-
-					parentChannel.send(
-						OutMsg.OnCartComplete(
-							CartResult(true)
-						)
-					)
-
-				}
-
-			}
 
         }
 

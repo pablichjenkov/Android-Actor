@@ -14,7 +14,7 @@ import com.mikepenz.fastadapter.GenericItem
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.select.getSelectExtension
 import kotlinx.android.synthetic.main.fragment_collection.recyclerView
-import kotlinx.android.synthetic.main.fragment_top_bottom_wrap_collection.*
+import kotlinx.android.synthetic.main.fragment_collection_parallax.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
@@ -23,11 +23,11 @@ import kotlinx.coroutines.channels.consumeEach
 import java.util.*
 
 
-class WrapCollectionFragment : Fragment() {
+class ParallaxCollectionFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var actor: CollectionActor<CollectionActor.InMsg>
+    private lateinit var actor: ParallaxCollectionActor<ParallaxCollectionActor.InMsg>
 
     private lateinit var headerAdapter: ItemAdapter<GenericItem>
 
@@ -40,7 +40,7 @@ class WrapCollectionFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_top_bottom_wrap_collection, container, false)
+        return inflater.inflate(R.layout.fragment_collection_parallax, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,7 +50,7 @@ class WrapCollectionFragment : Fragment() {
 
         bottomFrame.setOnClickListener {
 
-            actor.send(CollectionActor.InMsg.View.OnBottomViewClick)
+            actor.send(ParallaxCollectionActor.InMsg.View.OnBottomViewClick)
 
         }
 
@@ -65,17 +65,17 @@ class WrapCollectionFragment : Fragment() {
 
                 when (event) {
 
-                    CollectionActor.OutMsg.View.OnLoad -> {
+                    ParallaxCollectionActor.OutMsg.View.OnLoad -> {
 
                     }
 
-                    CollectionActor.OutMsg.View.OnSuccess -> {
+                    ParallaxCollectionActor.OutMsg.View.OnSuccess -> {
 
                         generateProducts()
 
                     }
 
-                    CollectionActor.OutMsg.View.OnError -> {
+                    ParallaxCollectionActor.OutMsg.View.OnError -> {
 
                     }
 
@@ -85,14 +85,14 @@ class WrapCollectionFragment : Fragment() {
 
         }
 
-        actor.send(CollectionActor.InMsg.View.OnViewReady)
+        actor.send(ParallaxCollectionActor.InMsg.View.OnViewReady)
 
     }
 
     override fun onStop() {
         super.onStop()
 
-        actor.send(CollectionActor.InMsg.View.OnViewStop)
+        actor.send(ParallaxCollectionActor.InMsg.View.OnViewStop)
 
         fragmentCoroutineScope.coroutineContext.cancelChildren()
 
@@ -189,9 +189,9 @@ class WrapCollectionFragment : Fragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance(actor: CollectionActor<CollectionActor.InMsg>) =
+        fun newInstance(actor: ParallaxCollectionActor<ParallaxCollectionActor.InMsg>) =
 
-            WrapCollectionFragment().apply {
+            ParallaxCollectionFragment().apply {
 
                 this.actor = actor
 

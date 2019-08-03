@@ -2,27 +2,26 @@ package com.hamperapp.order
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.collection.CollectionActor
+import com.hamperapp.collection.ParallaxCollectionActor
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 
 
 class ItemSelectorActor(
     uiSendChannel: SendChannel<UIActorMsg>
-) : CollectionActor<CollectionActor.InMsg>(uiSendChannel) {
+) : ParallaxCollectionActor<ParallaxCollectionActor.InMsg>(uiSendChannel) {
 
 	override var title = "Laundry Items Selection"
 
 	lateinit var parentChannel: SendChannel<OutMsg>
 
 
-    override fun onAction(inMsg: CollectionActor.InMsg) {
+    override fun onAction(inMsg: ParallaxCollectionActor.InMsg) {
 		super.onAction(inMsg)
 
         when (inMsg) {
 
-			InMsg.Test -> {}
-
-			CollectionActor.InMsg.View.OnBottomViewClick -> {
+			ParallaxCollectionActor.InMsg.View.OnBottomViewClick -> {
 
 				scope.launch {
 

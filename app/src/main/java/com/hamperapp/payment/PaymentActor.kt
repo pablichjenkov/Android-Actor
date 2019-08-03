@@ -22,19 +22,6 @@ class PaymentActor(
 
 			InMsg.Test -> {}
 
-			CollectionActor.InMsg.View.OnBottomViewClick -> {
-
-				scope.launch {
-
-					parentChannel.send(
-						OutMsg.OnPaymentComplete(
-							PaymentResult()
-						)
-					)
-
-				}
-
-			}
 
         }
 
