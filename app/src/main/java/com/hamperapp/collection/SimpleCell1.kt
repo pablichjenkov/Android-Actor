@@ -40,7 +40,7 @@ open class SimpleCell1 : AbstractItem<SimpleCell1.ViewHolder>(), IDraggable {
      * @return the layout for this item
      */
     override val layoutRes: Int
-        get() = R.layout.cell_simple
+        get() = R.layout.cell_product_info
 
     fun withHeader(header: String): SimpleCell1 {
         this.header = header
@@ -86,8 +86,8 @@ open class SimpleCell1 : AbstractItem<SimpleCell1.ViewHolder>(), IDraggable {
      * our ViewHolder
      */
     class ViewHolder(private var view: View) : FastAdapter.ViewHolder<SimpleCell1>(view) {
-        var name: TextView = view.findViewById(R.id.name)
-        var description: TextView = view.findViewById(R.id.description)
+        var name: TextView = view.findViewById(R.id.cost)
+        var description: TextView = view.findViewById(R.id.title)
 
         override fun bindView(cell: SimpleCell1, payloads: MutableList<Any>) {
             //get the context

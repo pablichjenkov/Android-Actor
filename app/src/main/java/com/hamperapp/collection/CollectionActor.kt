@@ -2,6 +2,8 @@ package com.hamperapp.collection
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
+import com.mikepenz.fastadapter.GenericItem
+import com.mikepenz.fastadapter.IItemList
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 
@@ -34,27 +36,6 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
 
 	}
 
-    override fun onAction(inMsg: T) {
-
-        when (inMsg) {
-
-            InMsg.View.OnViewReady -> {
-
-                scope.launch {
-
-					fragmentChannel.send(OutMsg.View.OnSuccess)
-
-                }
-
-            }
-
-			InMsg.View.OnViewStop -> {}
-
-        }
-
-    }
-
-
 	open class InMsg {
 
         open class View : InMsg() {
@@ -73,7 +54,7 @@ abstract class CollectionActor<in T : CollectionActor.InMsg>(
 
             object OnLoad : View()
 
-            object OnSuccess : View()
+            class OnUpdate(val itemList: IItemList<GenericItem>) : View()
 
             object OnError : View()
 

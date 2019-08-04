@@ -6,29 +6,25 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hamperapp.R
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.GenericItem
 import com.mikepenz.fastadapter.adapters.ItemAdapter
-import com.mikepenz.fastadapter.items.AbstractItem
 import com.mikepenz.fastadapter.select.getSelectExtension
 import kotlinx.android.synthetic.main.fragment_collection.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
-import java.util.ArrayList
 
 
 class CollectionFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var actor: CollectionActor<CollectionActor.InMsg>
-
-    private lateinit var headerAdapter: ItemAdapter<GenericItem>
+    private lateinit var actor: CollectionActor<CollectionActor.InMsg.View>
 
     private lateinit var itemAdapter: ItemAdapter<GenericItem>
 
@@ -61,9 +57,9 @@ class CollectionFragment : Fragment() {
 
                     }
 
-                    CollectionActor.OutMsg.View.OnSuccess -> {
+                    is CollectionActor.OutMsg.View.OnUpdate -> {
 
-                        generateProducts()
+                        itemAdapter.add(event.itemList.items)
 
                     }
 
@@ -92,25 +88,17 @@ class CollectionFragment : Fragment() {
 
     private fun setupAdapter() {
 
-        headerAdapter = ItemAdapter()
-
         itemAdapter = ItemAdapter()
 
-        fastAdapter = FastAdapter.with(listOf(headerAdapter, itemAdapter))
+        fastAdapter = FastAdapter.with(itemAdapter)
 
-        val selectExtension = fastAdapter.getSelectExtension()
+        //val selectExtension = fastAdapter.getSelectExtension()
 
-        selectExtension.isSelectable = true
+        //selectExtension.isSelectable = true
 
         fastAdapter.setHasStableIds(true)
 
-
-        //val layoutManager = LinearLayoutManager(context)
-
-        val layoutManager = GridLayoutManager(context, 2)
-
-
-        recyclerView.layoutManager = layoutManager
+        recyclerView.layoutManager = LinearLayoutManager(context)
 
         recyclerView.itemAnimator = DefaultItemAnimator()
 
@@ -118,42 +106,16 @@ class CollectionFragment : Fragment() {
 
     }
 
-    private fun generateProducts() {
-
-        //fill with some sample data
-        val item = SimpleCell().withName("Header")
-        item.identifier = 1
-        headerAdapter.add(item)
-
-        val items = ArrayList<GenericItem>()
-
-        for (i in 1..20) {
-
-            val simpleItem = SimpleCell().withName("Test $i").withHeader(headers[i / 5])
-
-            simpleItem.identifier = (100 + i).toLong()
-
-            items.add(simpleItem)
-
-            items.add(SimpleCell1())
-        }
-
-        itemAdapter.add(items)
-    }
-
     companion object {
 
         @JvmStatic
-        fun newInstance(actor: CollectionActor<CollectionActor.InMsg>) =
+        fun newInstance(actor: CollectionActor<CollectionActor.InMsg.View>) =
 
             CollectionFragment().apply {
 
                 this.actor = actor
 
             }
-
-        private val headers = arrayOf("A", "B", "C", "D", "E", "F", "G", "H", "I",
-            "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
 
     }
 

@@ -9,8 +9,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hamperapp.R
+import com.hamperapp.log.Logger
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.GenericItem
+import com.mikepenz.fastadapter.ISelectionListener
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.select.getSelectExtension
 import kotlinx.android.synthetic.main.fragment_collection.recyclerView
@@ -27,9 +29,7 @@ class ParallaxCollectionFragment : Fragment() {
 
     private val fragmentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private lateinit var actor: ParallaxCollectionActor<ParallaxCollectionActor.InMsg>
-
-    private lateinit var headerAdapter: ItemAdapter<GenericItem>
+    private lateinit var actor: ParallaxCollectionActor<ParallaxCollectionActor.InMsg.View>
 
     private lateinit var itemAdapter: ItemAdapter<GenericItem>
 
@@ -69,9 +69,9 @@ class ParallaxCollectionFragment : Fragment() {
 
                     }
 
-                    ParallaxCollectionActor.OutMsg.View.OnSuccess -> {
+                    is ParallaxCollectionActor.OutMsg.View.OnUpdate -> {
 
-                        generateProducts()
+                        itemAdapter.add(event.itemList.items)
 
                     }
 
@@ -100,15 +100,27 @@ class ParallaxCollectionFragment : Fragment() {
 
     private fun setupAdapter() {
 
-        headerAdapter = ItemAdapter()
-
         itemAdapter = ItemAdapter()
 
-        fastAdapter = FastAdapter.with(listOf(headerAdapter, itemAdapter))
+        fastAdapter = FastAdapter.with(itemAdapter)
 
         val selectExtension = fastAdapter.getSelectExtension()
 
         selectExtension.isSelectable = true
+
+        selectExtension.multiSelect = true
+
+        selectExtension.allowDeselection = true
+
+        selectExtension.selectionListener = object: ISelectionListener<GenericItem> {
+
+            override fun onSelectionChanged(item: GenericItem?, selected: Boolean) {
+
+                Logger.d("onSelectionChanged: ${item?.isSelected}")
+
+            }
+
+        }
 
         fastAdapter.setHasStableIds(true)
 
@@ -163,42 +175,17 @@ class ParallaxCollectionFragment : Fragment() {
 
     }
 
-    private fun generateProducts() {
-
-        //fill with some sample data
-        val item = SimpleCell().withName("Header")
-        item.identifier = 1
-        headerAdapter.add(item)
-
-        val items = ArrayList<GenericItem>()
-
-        for (i in 1..20) {
-
-            val simpleItem = SimpleCell().withName("Test $i").withHeader(headers[i / 5])
-
-            simpleItem.identifier = (100 + i).toLong()
-
-            items.add(simpleItem)
-
-            items.add(SimpleCell1())
-        }
-
-        itemAdapter.add(items)
-    }
 
     companion object {
 
         @JvmStatic
-        fun newInstance(actor: ParallaxCollectionActor<ParallaxCollectionActor.InMsg>) =
+        fun newInstance(actor: ParallaxCollectionActor<ParallaxCollectionActor.InMsg.View>) =
 
             ParallaxCollectionFragment().apply {
 
                 this.actor = actor
 
             }
-
-        private val headers = arrayOf("A", "B", "C", "D", "E", "F", "G", "H", "I",
-            "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z")
 
     }
 
