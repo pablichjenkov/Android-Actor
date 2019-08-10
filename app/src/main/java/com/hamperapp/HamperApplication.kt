@@ -1,16 +1,12 @@
 package com.hamperapp
 
 import android.app.Application
-import com.hamperapp.auth.AuthAPI
-import com.hamperapp.auth.AuthActor
-import retrofit2.Retrofit
+import com.hamperapp.auth.AuthManager
 
 
 class HamperApplication : Application() {
 
-    lateinit var authActor: AuthActor
-
-    lateinit var authAPI: AuthAPI
+    lateinit var authManager: AuthManager
 
 
     override fun onCreate() {
@@ -18,13 +14,7 @@ class HamperApplication : Application() {
 
         instance = this@HamperApplication
 
-        authActor = AuthActor()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
-            .build()
-
-        authAPI = retrofit.create<AuthAPI>(AuthAPI::class.java)
+        authManager = AuthManager
 
     }
 

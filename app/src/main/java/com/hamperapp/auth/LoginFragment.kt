@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.hamperapp.EmailLoginReq
+import com.hamperapp.LoginReq
 import com.hamperapp.R
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.*
@@ -32,11 +34,14 @@ class LoginFragment : Fragment() {
 
         loginBtn.setOnClickListener {
 
-            actor.send(
-                AuthPresenterActor.InMsg.View.DoLogin(
-                    emailOrPhone.text.toString(),
-                    password.text.toString()
-                ))
+            val loginReq = EmailLoginReq(
+                email = emailOrPhone.text.toString(),
+                password = password.text.toString(),
+                deviceToken = "crap_for_now",
+                deviceId = "emulator"
+            )
+
+            actor.send(AuthPresenterActor.InMsg.View.DoLogin(loginReq))
 
         }
 
@@ -51,13 +56,13 @@ class LoginFragment : Fragment() {
 
                 when (event) {
 
-                    AuthPresenterActor.OutMsg.View.OnLoad -> {
+                    AuthPresenterActor.OutMsg.View.Login.OnLoad -> {
 
                         progressBar.visibility = View.VISIBLE
 
                     }
 
-                    AuthPresenterActor.OutMsg.View.OnSuccess -> {
+                    AuthPresenterActor.OutMsg.View.Login.OnSuccess -> {
 
                         progressBar.visibility = View.GONE
 
@@ -65,9 +70,11 @@ class LoginFragment : Fragment() {
 
                     }
 
-                    AuthPresenterActor.OutMsg.View.OnError -> {
+                    is AuthPresenterActor.OutMsg.View.Login.OnError -> {
 
                         progressBar.visibility = View.GONE
+
+                        Toast.makeText(context, event.th.message, Toast.LENGTH_SHORT).show()
 
                     }
 

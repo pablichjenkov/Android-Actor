@@ -1,6 +1,7 @@
 package com.hamperapp.collection
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,9 +18,7 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.select.getSelectExtension
 import kotlinx.android.synthetic.main.fragment_collection.recyclerView
 import kotlinx.android.synthetic.main.fragment_collection_parallax.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 import java.util.*

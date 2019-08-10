@@ -12,9 +12,7 @@ object Logger {
 
     fun e(throwable: Throwable) {
 
-        throwable.message?.let {
-            Log.e(TAG, it)
-        }
+        throwable.printStackTrace()
 
         // TODO(Pablo): Log this to a remote error collector endpoint
     }

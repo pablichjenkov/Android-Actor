@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.hamperapp.R
+import com.hamperapp.SignupReq
 import kotlinx.android.synthetic.main.fragment_signup.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +35,18 @@ class SignupFragment : Fragment() {
 
         signupBtn.setOnClickListener {
 
-            actor.send(AuthPresenterActor.InMsg.View.DoSignUp)
+            val signupReq = SignupReq(
+                email = email.text.toString(),
+                password = password.text.toString(),
+                phone = phone.text.toString(),
+                zipcode = "33182",
+                name = firstName.text.toString(),
+                deviceToken = "crap_for_now",// TODO: Get this from the Push Notification provider
+                deviceId = "emulator",
+                requestId = "crap_for_now" // TODO: Get this from the Phone verifier provider
+            )
+
+            actor.send(AuthPresenterActor.InMsg.View.DoSignUp(signupReq))
 
         }
 
@@ -49,23 +61,25 @@ class SignupFragment : Fragment() {
 
                 when (event) {
 
-                    AuthPresenterActor.OutMsg.View.OnLoad -> {
+                    AuthPresenterActor.OutMsg.View.Signup.OnLoad -> {
 
                         progressBar.visibility = View.VISIBLE
 
                     }
 
-                    AuthPresenterActor.OutMsg.View.OnSuccess -> {
+                    AuthPresenterActor.OutMsg.View.Signup.OnSuccess -> {
 
                         progressBar.visibility = View.GONE
 
-                        Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Sign up Successful", Toast.LENGTH_SHORT).show()
 
                     }
 
-                    AuthPresenterActor.OutMsg.View.OnError -> {
+                    is AuthPresenterActor.OutMsg.View.Signup.OnError -> {
 
                         progressBar.visibility = View.GONE
+
+                        Toast.makeText(context, event.th.message, Toast.LENGTH_SHORT).show()
 
                     }
 

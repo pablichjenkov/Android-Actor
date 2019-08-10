@@ -16,11 +16,9 @@ class MainActor(
 
 	private var activeActor: Actor<*>? = null
 
-	private var authActor = HamperApplication.instance.authActor
-
 	private var splashActor = SplashActor(uiSendChannel)
 
-	private var authPresenterActor = AuthPresenterActor(authActor, uiSendChannel)
+	private var authPresenterActor = AuthPresenterActor(uiSendChannel)
 
 	private var drawerUIActor = NavigationActor(uiSendChannel)
 
@@ -96,13 +94,13 @@ class MainActor(
 
 			when (authPMsg) {
 
-				is AuthPresenterActor.OutMsg.AuthSuccess -> {
+				AuthPresenterActor.OutMsg.Login.AuthSuccess -> {
 
 					setActiveActor(drawerUIActor)
 
 				}
 
-				is AuthPresenterActor.OutMsg.AuthError -> {
+				is AuthPresenterActor.OutMsg.Login.AuthError -> {
 
 					if (authPMsg.error.contains("Back")) {
 

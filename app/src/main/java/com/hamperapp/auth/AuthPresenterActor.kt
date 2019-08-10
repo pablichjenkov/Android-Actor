@@ -1,14 +1,15 @@
 package com.hamperapp.auth
 
-import com.hamperapp.UIActorMsg
+import com.hamperapp.*
 import com.hamperapp.actor.Actor
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
 class AuthPresenterActor(
-    private var authActor: AuthActor,
     private var uiSendChannel: SendChannel<UIActorMsg>
 ): Actor<AuthPresenterActor.InMsg>() {
 
@@ -23,6 +24,8 @@ class AuthPresenterActor(
     lateinit var parentChannel: SendChannel<OutMsg>
 
     lateinit var fragmentChannel: SendChannel<OutMsg.View>
+
+    val authManager = HamperApplication.instance.authManager
 
 
     override fun start() {
@@ -40,6 +43,7 @@ class AuthPresenterActor(
 
     }
 
+    @UseExperimental(InternalCoroutinesApi::class)
     override fun onAction(inMsg: InMsg) {
 
         when (inMsg) {
@@ -56,15 +60,24 @@ class AuthPresenterActor(
 
                 scope.launch {
 
-                    fragmentChannel.send(OutMsg.View.OnLoad)
+                    fragmentChannel.send(OutMsg.View.Login.OnLoad)
 
-                    delay(1000)
+                    authManager
+                        .doLogin(inMsg.loginReq)
+                        .catch { th ->
 
-                    fragmentChannel.send(OutMsg.View.OnSuccess)
+                            // TODO: Handle each exception separately
+                            fragmentChannel.send(OutMsg.View.Login.OnError(th))
 
-                    delay(500)
+                        }
+                        .collect {
 
-                    parentChannel.send(OutMsg.AuthSuccess("SUCCESS_TOKEN"))
+                            fragmentChannel.send(OutMsg.View.Login.OnSuccess)
+
+                            // We send a success to our parent so he will handle the Active stage to other actor
+                            parentChannel.send(OutMsg.Login.AuthSuccess)
+
+                        }
 
                 }
 
@@ -76,7 +89,26 @@ class AuthPresenterActor(
 
             InMsg.View.OnSignupViewReady -> {}
 
-            InMsg.View.DoSignUp -> {}
+            is InMsg.View.DoSignUp -> {
+
+                scope.launch {
+
+                    fragmentChannel.send(OutMsg.View.Signup.OnLoad)
+
+                    authManager
+                        .doSignup(inMsg.signupReq)
+                        .collect { resp ->
+
+                            fragmentChannel.send(OutMsg.View.Signup.OnSuccess)
+
+                            // We send a success to our parent so he will handle the Active stage to other actor
+                            parentChannel.send(OutMsg.Signup.Success)
+
+                        }
+
+                }
+
+            }
 
             InMsg.View.OnSignupViewStop -> {}
 
@@ -151,7 +183,7 @@ class AuthPresenterActor(
 
                 scope.launch {
 
-                    parentChannel.send(OutMsg.AuthError("Back Pressed Cancelled"))
+                    parentChannel.send(OutMsg.Login.AuthError("Back Pressed Cancelled"))
 
                 }
 
@@ -179,7 +211,7 @@ class AuthPresenterActor(
 
             object OnLoginViewStop : View()
 
-            class DoLogin(val username: String, val password: String) : View()
+            class DoLogin(val loginReq: LoginReq) : View()
 
             object ShowSignUp : View()
 
@@ -187,7 +219,7 @@ class AuthPresenterActor(
 
             object OnSignupViewStop : View()
 
-            object DoSignUp : View()
+            class DoSignUp(val signupReq: SignupReq) : View()
 
         }
 
@@ -195,18 +227,43 @@ class AuthPresenterActor(
 
     sealed class OutMsg {
 
-        class AuthSuccess(val token: String) : OutMsg()
+        sealed class Login : OutMsg() {
 
-        class AuthError(val error: String) : OutMsg()
+            object AuthSuccess : Login()
 
+            class AuthError(val error: String) : Login()
+
+        }
+
+        sealed class Signup : OutMsg() {
+
+            object Success : Signup()
+
+            class Error(val error: String) : Signup()
+
+        }
 
         sealed class View : OutMsg() {
 
-            object OnLoad : View()
+            sealed class Login : View() {
 
-            object OnSuccess : View()
+                object OnLoad : Login()
 
-            object OnError : View()
+                object OnSuccess : Login()
+
+                class OnError(val th: Throwable) : Login()
+
+            }
+
+            sealed class Signup : View() {
+
+                object OnLoad : Signup()
+
+                object OnSuccess : Signup()
+
+                class OnError(val th: Throwable) : Signup()
+
+            }
 
         }
 
