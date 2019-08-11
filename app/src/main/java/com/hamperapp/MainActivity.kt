@@ -12,6 +12,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
+import com.microsoft.appcenter.crashes.Crashes
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.AppCenter
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -30,6 +35,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         renderBox = RenderContextDefault(supportFragmentManager, frameBox)
+
+        val appCenterClientId = HamperApplication.instance.configManager.getAppCenterClientId()
+
+        AppCenter.start(application,
+            appCenterClientId,
+            Analytics::class.java,
+            Crashes::class.java
+        )
 
         createUiActor()
 

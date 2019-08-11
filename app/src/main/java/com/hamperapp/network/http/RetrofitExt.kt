@@ -1,5 +1,6 @@
 package com.hamperapp.network.http
 
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.FlowCollector
 import retrofit2.Call
 
@@ -31,3 +32,5 @@ suspend fun <Resp> FlowCollector<Resp>.doRequest(call: Call<Resp>) {
 	}
 
 }
+
+inline fun <reified T> genericType() = object: TypeToken<T>(){}.type

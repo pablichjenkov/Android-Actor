@@ -60,7 +60,7 @@ data class AccessToken(
 	val expires: Long?
 )
 
-data class User(
+data class SignupUser(
 	val email: String?,
 	val password: String?,
 	val phone: String?,
@@ -70,7 +70,7 @@ data class User(
 
 data class SignUpResp(
 	@SerializedName("access_token") val accessToken: AccessToken?,
-	val user: User?,
+	@SerializedName("user") val signupUser: SignupUser?,
 	val zip: String?
 )
 
@@ -102,7 +102,33 @@ data class UsernameLoginReq(
 ) : LoginReq()
 
 data class LoginResp(
-	val token: String?,
+	@SerializedName("user") val loginUser: LoginUser?,
+	val userId: Int?,
 	val role: String?,
-	val userId: String?
+	val token: String?
+)
+
+data class LoginUser(
+	val id: Int?,
+	val name: String?,
+	val email: String?,
+	val phone: String?,
+	val city: String?,
+	val address: String?,
+	@SerializedName("subscription_id") val subscriptionId: Long?,
+	@SerializedName("total_spent") val totalSpent: String?,
+	val laundry: Int?,
+	@SerializedName("dry_cleaning") val dryCleaning: Int?,
+	@SerializedName("created_at") val createdAt: String?,
+	@SerializedName("updated_at") val updatedAt: String?,
+	@SerializedName("remember_token") val rememberToken: String?,
+	@SerializedName("zip_id") val zipId: Int?,
+	val status: String?,
+	@SerializedName("payment_streak") val paymentStreak: Int?,
+	@SerializedName("stripe_id") val stripeId: String?,
+	@SerializedName("phone_verified") val phoneVerified: Boolean?,
+	@SerializedName("sms_notification") val smsNotification: Boolean?,
+	@SerializedName("push_notification") val pushNotification: Boolean?,
+	@SerializedName("email_notification") val emailNotification: Boolean?,
+	@SerializedName("country_code") val countryCode: String?
 )

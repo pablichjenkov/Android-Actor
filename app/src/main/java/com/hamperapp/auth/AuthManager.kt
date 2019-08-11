@@ -5,6 +5,7 @@ import com.hamperapp.network.http.Http
 import com.hamperapp.network.http.doRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import retrofit2.Call
 
 
@@ -12,8 +13,10 @@ object AuthManager {
 
 	private val commonApi = Http.provideCommonApi
 
+	private var loginRespSnapshot: LoginResp? = null
 
-	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow {
+
+	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow<LoginResp> {
 
 		lateinit var call: Call<LoginResp>
 
@@ -35,6 +38,10 @@ object AuthManager {
 
 		doRequest(call)
 
+	}.onEach {
+
+		loginRespSnapshot = it
+
 	}
 
 	fun doSignup(signupReq: SignupReq): Flow<SignUpResp> = flow {
@@ -42,5 +49,9 @@ object AuthManager {
 		doRequest(commonApi.signup(signupReq))
 
 	}
+
+	fun authToken(): String = loginRespSnapshot?.token.orEmpty()
+
+
 
 }
