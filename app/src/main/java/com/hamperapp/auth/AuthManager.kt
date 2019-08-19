@@ -2,6 +2,7 @@ package com.hamperapp.auth
 
 import com.hamperapp.*
 import com.hamperapp.network.http.Http
+import com.hamperapp.network.http.asFlow
 import com.hamperapp.network.http.doRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -9,14 +10,20 @@ import kotlinx.coroutines.flow.onEach
 import retrofit2.Call
 
 
-object AuthManager {
+class AuthManager(val storageManager: StorageManager) {
 
 	private val commonApi = Http.provideCommonApi
+
+	private val signupFormHolder = SignupForm()
+
+	private var signUpRespSnapshot: SignUpResp? = null
+
+	private val loginFormHolder = LoginForm()
 
 	private var loginRespSnapshot: LoginResp? = null
 
 
-	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow<LoginResp> {
+	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow {
 
 		lateinit var call: Call<LoginResp>
 
@@ -44,14 +51,26 @@ object AuthManager {
 
 	}
 
-	fun doSignup(signupReq: SignupReq): Flow<SignUpResp> = flow {
+	fun doSignup(signupReq: SignupReq): Flow<SignUpResp> = commonApi.signup(signupReq).asFlow()
 
-		doRequest(commonApi.signup(signupReq))
+	fun checkZipCode(zipCode: String): Flow<String> = flow {
+
+		//doRequest(commonApi.signup(signupReq))
 
 	}
 
 	fun authToken(): String = loginRespSnapshot?.token.orEmpty()
 
+	fun persistZipCode(zipCode: String) {
 
+		return storageManager.write("KEY_zipCode", zipCode)
+
+	}
+
+	fun zipCode(): String? {
+
+		return storageManager.read("KEY_zipCode")
+
+	}
 
 }

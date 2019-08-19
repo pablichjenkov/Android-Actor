@@ -1,9 +1,7 @@
 package com.hamperapp.actor
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -13,7 +11,7 @@ abstract class Actor<in T> {
 
 	protected var scope = CoroutineScope(Dispatchers.IO + job)
 
-	private var inputChannel: SendChannel<T>? = null
+	private var channel: Channel<T>? = null
 
 	private var isStarted: AtomicBoolean = AtomicBoolean(false)
 
@@ -32,7 +30,7 @@ abstract class Actor<in T> {
 
 		scope.launch {
 
-			inputChannel?.send(inMsg)
+			channel?.send(inMsg)
 
 		}
 
@@ -56,7 +54,7 @@ abstract class Actor<in T> {
 
 		onClose()
 
-		inputChannel?.close()
+		channel?.close()
 
 		scope.cancel()
 
@@ -64,15 +62,18 @@ abstract class Actor<in T> {
 
 	private fun startCoroutineActor() {
 
-		inputChannel = scope.actor {
+		channel = Channel()
 
-			consumeEach { msg ->
+		scope.launch {
+
+			channel?.consumeEach { msg ->
 
 				onAction(msg)
 
 			}
 
 		}
+
 
 	}
 

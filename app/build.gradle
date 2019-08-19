@@ -1,7 +1,5 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
 
 android {
@@ -51,6 +49,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:2.6.0"
     implementation "com.squareup.retrofit2:converter-gson:2.6.0"
 
+    // NoSql
+    implementation "io.paperdb:paperdb:2.6"
+
     // Generic Adapter
     implementation 'com.mikepenz:fastadapter:4.0.1'
 
@@ -62,9 +63,6 @@ dependencies {
     implementation 'com.mikepenz:fastadapter-extensions-swipe:4.0.1'    // swipe support
     implementation 'com.mikepenz:fastadapter-extensions-ui:4.0.1'       // pre-defined ui components
     implementation 'com.mikepenz:fastadapter-extensions-utils:4.0.1'    // needs the `expandable`, `drag` and `scroll` extension.
-
-    // The tiny Materialize library used for its useful helper classes
-    //implementation 'com.mikepenz:materialize:1.2.1'
 
     // UI
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.17'

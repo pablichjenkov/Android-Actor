@@ -3,12 +3,17 @@ package com.hamperapp
 import com.google.gson.annotations.SerializedName
 import com.hamperapp.network.http.Http
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.*
 
 
 interface CommonApi {
+
+	@GET("zip-code/{zipCode}/check")
+	@Headers(
+		Http.Header_ContentType_ApplicationJson,
+		Http.Header_Accept_ApplicationJson
+	)
+	fun checkZipCode(@Path("zipCode") zipCode: String): Call<SignUpResp>
 
 	@POST("register")
 	@Headers(
@@ -48,11 +53,12 @@ data class SignupReq (
 	@SerializedName("email") val email : String?,
 	@SerializedName("password") val password : String?,
 	@SerializedName("phone") val phone : String?,
+	@SerializedName("country_code") val countryCode : String?,
 	@SerializedName("zip") val zipcode : String?,
-	@SerializedName("name") val name : String?,
-	@SerializedName("device_token") val deviceToken : String?,
-	@SerializedName("device_id") val deviceId : String?,
-	@SerializedName("request_id") val requestId : String? // request_id from /api/verify-phone/check response
+	@SerializedName("name") val name : String?
+	//@SerializedName("device_token") val deviceToken : String?,
+	//@SerializedName("device_id") val deviceId : String?,
+	//@SerializedName("request_id") val requestId : String? // request_id from /api/verify-phone/check response
 )
 
 data class AccessToken(

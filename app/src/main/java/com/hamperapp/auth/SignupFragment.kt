@@ -4,14 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.hamperapp.R
 import com.hamperapp.SignupReq
+import com.hamperapp.common.StringUtil
 import kotlinx.android.synthetic.main.fragment_signup.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
 
@@ -35,18 +35,7 @@ class SignupFragment : Fragment() {
 
         signupBtn.setOnClickListener {
 
-            val signupReq = SignupReq(
-                email = email.text.toString(),
-                password = password.text.toString(),
-                phone = phone.text.toString(),
-                zipcode = "33182",
-                name = firstName.text.toString(),
-                deviceToken = "crap_for_now",// TODO: Get this from the Push Notification provider
-                deviceId = "emulator",
-                requestId = "crap_for_now" // TODO: Get this from the Phone verifier provider
-            )
-
-            actor.send(AuthPresenterActor.InMsg.View.DoSignUp(signupReq))
+            validateFormAndDoRequest()
 
         }
 
@@ -100,6 +89,74 @@ class SignupFragment : Fragment() {
 
         fragmentCoroutineScope.coroutineContext.cancelChildren()
     }
+
+    fun validateFormAndDoRequest() {
+
+        var errorCount = 0
+
+        val emailText = email.text.toString()
+
+        if (!StringUtil.isValidEmail(emailText)) {
+
+            presentErrorText(invalidEmailLabel)
+
+            errorCount ++
+
+        }
+
+        val phoneNumber = phone.text.toString()
+
+        if (!StringUtil.isValidPhone(phoneNumber)) {
+
+            presentErrorText(invalidPhoneLabel)
+
+            errorCount ++
+
+        }
+
+        val passwordText = password.text.toString()
+
+        if (!StringUtil.isValidPassword(passwordText)) {
+
+            presentErrorText(invalidPasswordLabel)
+
+            errorCount ++
+
+        }
+
+        if (errorCount > 0) {
+            return
+        }
+
+        val signupReq = SignupReq(
+            email = emailText,
+            password = passwordText,
+            phone = phoneNumber,
+            zipcode = "33182",
+            name = firstName.text.toString(),
+            deviceToken = "crap_for_now",// TODO: Get this from the Push Notification provider
+            deviceId = "emulator",
+            requestId = "crap_for_now" // TODO: Get this from the Phone verifier provider
+        )
+
+        actor.send(AuthPresenterActor.InMsg.View.DoSignUp(signupReq))
+
+    }
+
+    private fun presentErrorText(textView: TextView) {
+
+        fragmentCoroutineScope.launch {
+
+            textView.visibility = View.VISIBLE
+
+            delay(5000)
+
+            textView.visibility = View.INVISIBLE
+
+        }
+
+    }
+
 
     companion object {
 

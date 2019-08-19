@@ -66,7 +66,7 @@ class AuthPresenterActor(
                         .doLogin(inMsg.loginReq)
                         .catch { th ->
 
-                            // TODO: Handle each exception separately
+                            // TODO: Make a util class to provide a message per each type of exception.
                             fragmentChannel.send(OutMsg.View.Login.OnError(th))
 
                         }
@@ -97,6 +97,12 @@ class AuthPresenterActor(
 
                     authManager
                         .doSignup(inMsg.signupReq)
+                        .catch { th ->
+
+                            // TODO: Make a util class to provide a message per each type of exception.
+                            fragmentChannel.send(OutMsg.View.Signup.OnError(th))
+
+                        }
                         .collect { resp ->
 
                             fragmentChannel.send(OutMsg.View.Signup.OnSuccess)
