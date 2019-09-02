@@ -44,9 +44,25 @@ class SplashActor(
 
                 scope.launch {
 
-					fragmentChannel.send(OutMsg.View.OnLoad)
+					fragmentChannel.send(OutMsg.View.ShowZipInput)
 
-                    delay(1000)
+                }
+
+            }
+
+            InMsg.View.OnViewStop -> {}
+
+            is InMsg.View.OnZipcodeEnter -> {
+
+                // TODO: Validate zipcode is covered by Hamper Service
+                // TODO: Save zipcode in local storage
+                inMsg.zipcode
+
+                scope.launch {
+
+                    fragmentChannel.send(OutMsg.View.OnLoad)
+
+                    delay(2000)
 
 					fragmentChannel.send(OutMsg.View.OnSuccess)
 
@@ -57,8 +73,6 @@ class SplashActor(
                 }
 
             }
-
-            InMsg.View.OnViewStop -> {}
 
         }
 
@@ -82,6 +96,8 @@ class SplashActor(
 
             object OnViewStop : View()
 
+            class OnZipcodeEnter(val zipcode: String) : View()
+
         }
 
     }
@@ -92,6 +108,8 @@ class SplashActor(
 
 
         sealed class View : OutMsg() {
+
+            object ShowZipInput : View()
 
             object OnLoad : View()
 

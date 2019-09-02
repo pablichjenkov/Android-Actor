@@ -26,7 +26,7 @@ class StorageManager(appContext: Context) {
 
 	fun <T> read(docName: String): T {
 
-		return Paper.book(AppStorageDir).read(docName, null)
+		return Paper.book(AppStorageDir).read(docName, null) as T
 
 	}
 

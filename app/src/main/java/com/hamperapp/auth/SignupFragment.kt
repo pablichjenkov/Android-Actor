@@ -134,9 +134,10 @@ class SignupFragment : Fragment() {
             phone = phoneNumber,
             zipcode = "33182",
             name = firstName.text.toString(),
-            deviceToken = "crap_for_now",// TODO: Get this from the Push Notification provider
-            deviceId = "emulator",
-            requestId = "crap_for_now" // TODO: Get this from the Phone verifier provider
+            countryCode = "US"
+            //deviceToken = "crap_for_now",// TODO: Get this from the Push Notification provider
+            //deviceId = "emulator",
+            //requestId = "crap_for_now" // TODO: Get this from the Phone verifier provider
         )
 
         actor.send(AuthPresenterActor.InMsg.View.DoSignUp(signupReq))

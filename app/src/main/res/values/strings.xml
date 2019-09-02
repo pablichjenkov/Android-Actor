@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Actor App</string>
+    <string name="done">done</string>
+    <string name="submit">submit</string>
+    <string name="accept">accept</string>
+    <string name="deny">deny</string>
+    <string name="cancel">cancel</string>
+    <string name="ok">ok</string>
+    <string name="zipcode">zipcode</string>
 </resources>

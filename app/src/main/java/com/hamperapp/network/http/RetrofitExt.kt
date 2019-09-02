@@ -35,7 +35,7 @@ suspend fun <Resp> FlowCollector<Resp>.doRequest(call: Call<Resp>) {
 
 }
 
-fun <T> Call<T>.asFlow(): Flow<T> = flow {
+fun <T> Call<T>.asFlow(): Flow<T> = flow<T> {
 
 	val resp = execute()
 

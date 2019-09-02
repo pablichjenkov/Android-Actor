@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.hamperapp.BuildConfig
 import com.hamperapp.CommonApi
+import com.hamperapp.HamperApplication
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.converter.gson.GsonConverterFactory
@@ -23,14 +24,13 @@ object Http {
 	const val Header_ContentType_ApplicationJson = "Content-Type: application/json"
 	const val Header_Accept_ApplicationJson = "Accept: application/json"
 
-	private const val COMMON_API_URL = "http://dev.hamperapp.ronasit.com/api/"
-
-
 	val provideCommonApi by lazy<CommonApi> {
+
+		val commonApiDomain = HamperApplication.instance.configManager.getCommonApiBaseUrl()
 
 		Retrofit
 			.Builder()
-			.baseUrl(COMMON_API_URL)
+			.baseUrl(commonApiDomain)
 			.client(okHttpClient)
 			.addConverterFactory(provideGsonConverterFactory)
 			.build()

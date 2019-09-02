@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.input.input
 import com.hamperapp.R
 import kotlinx.android.synthetic.main.fragment_splash.*
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +39,30 @@ class SplashFragment : Fragment() {
             consumeEach { event ->
 
                 when (event) {
+
+                    SplashActor.OutMsg.View.ShowZipInput -> {
+
+                        MaterialDialog(requireContext()).show {
+
+                            cancelOnTouchOutside(false)
+
+                            input(
+                                allowEmpty = true,
+                                hintRes = R.string.zipcode
+                            ) { dialog, text ->
+
+                                Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+
+                                actor.send(
+                                    SplashActor.InMsg.View.OnZipcodeEnter(text.toString())
+                                )
+
+                            }
+
+                            positiveButton(R.string.submit)
+                        }
+
+                    }
 
                     SplashActor.OutMsg.View.OnLoad -> {
 

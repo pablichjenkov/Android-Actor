@@ -23,7 +23,7 @@ class AuthManager(val storageManager: StorageManager) {
 	private var loginRespSnapshot: LoginResp? = null
 
 
-	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow {
+	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow<LoginResp> {
 
 		lateinit var call: Call<LoginResp>
 
