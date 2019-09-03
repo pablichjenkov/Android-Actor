@@ -2,14 +2,12 @@ package com.hamperapp.auth
 
 import com.hamperapp.*
 import com.hamperapp.actor.Actor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import androidx.core.content.ContextCompat.startActivity
-import android.content.Intent
-import com.facebook.AccessToken
 
 
 class AuthPresenterActor(
@@ -28,22 +26,37 @@ class AuthPresenterActor(
 
     lateinit var fragmentChannel: SendChannel<OutMsg.View>
 
-    val authManager = HamperApplication.instance.authManager
+    private val authManager = HamperApplication.instance.authManager
 
 
     override fun start() {
         super.start()
 
-        // If User is logged-in already, dispatch Auth Success and return
-        if (checkLoginBeforeAndDispatchResult()) { return }
+        scope.launch {
 
-        when (stage) {
+            checkLoginBefore()
+                .collect { loginBefore ->
 
-            Stage.Select -> showSelect()
+                    if (loginBefore) {
 
-            Stage.Login -> showLogin()
+                        parentChannel.send(OutMsg.Login.AuthSuccess)
 
-            Stage.Signup -> showSignup()
+                    }
+                    else {
+
+                        when (stage) {
+
+                            Stage.Select -> showSelect()
+
+                            Stage.Login -> showLogin()
+
+                            Stage.Signup -> showSignup()
+
+                        }
+
+                    }
+
+                }
 
         }
 
@@ -64,7 +77,20 @@ class AuthPresenterActor(
 
             InMsg.View.OnLoginFragmentResult -> {
 
-                checkLoginBeforeAndDispatchResult()
+                scope.launch {
+
+                    checkLoginBefore()
+                        .collect { loginBefore ->
+
+                            if (loginBefore) {
+
+                                parentChannel.send(OutMsg.Login.AuthSuccess)
+
+                            }
+
+                        }
+
+                }
 
             }
 
@@ -102,7 +128,22 @@ class AuthPresenterActor(
             InMsg.View.OnSignupViewReady -> { }
 
             InMsg.View.OnSignupFragmentResult -> {
-                checkLoginBeforeAndDispatchResult()
+
+                scope.launch {
+
+                    checkLoginBefore()
+                        .collect { loginBefore ->
+
+                            if (loginBefore) {
+
+                                parentChannel.send(OutMsg.Login.AuthSuccess)
+
+                            }
+
+                        }
+
+                }
+
             }
 
             is InMsg.View.DoSignUp -> {
@@ -136,24 +177,6 @@ class AuthPresenterActor(
 
         }
 
-    }
-
-    private fun checkLoginBeforeAndDispatchResult(): Boolean {
-
-        val accessToken = AccessToken.getCurrentAccessToken()
-
-        val isLoggedIn = accessToken != null && !accessToken.isExpired
-
-        if (isLoggedIn) {
-            scope.launch {
-                parentChannel.send(OutMsg.Login.AuthSuccess)
-            }
-
-            // User is logged-in with facebook we stop here
-            return true
-        }
-
-        return false
     }
 
     override fun back() {
@@ -236,6 +259,27 @@ class AuthPresenterActor(
         }
 
     }
+
+    private fun CoroutineScope.checkLoginBefore(): Flow<Boolean> {
+
+        val hamperAuthToken = authManager.authToken()
+
+        if (hamperAuthToken != null) {
+
+            return flowOf(true)
+
+        }
+
+        if (authManager.verifyFBLogin()) {
+
+            return authManager.doLoginWithFacebookToken()
+
+        }
+
+        return flowOf(false)
+
+    }
+
 
     sealed class InMsg {
 

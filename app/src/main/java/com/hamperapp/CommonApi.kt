@@ -36,6 +36,11 @@ interface CommonApi {
 	)
 	fun login(@Body emailLogin: UsernameLoginReq): Call<LoginResp>
 
+	@POST("fb-login")
+	fun loginWithFacebookToken(
+		@Body loginWithFacebookReq: LoginWithFacebookReq
+	): Call<LoginWithFacebookResp>
+
 	@GET("zip-code/{zipCode}/check")
 	@Headers(
 		Http.Header_ContentType_ApplicationJson,
@@ -111,12 +116,26 @@ data class UsernameLoginReq(
 	@SerializedName("device_id") val deviceId: String
 ) : LoginReq()
 
+data class LoginWithFacebookReq(
+	@SerializedName("access_token") val accessToken: String,
+	@SerializedName("device_token") val deviceToken: String,
+	@SerializedName("device_id") val deviceId: String
+)
+
 data class LoginResp(
 	@SerializedName("user") val loginUser: LoginUser?,
 	val userId: Int?,
 	val role: String?,
 	val token: String?
 )
+
+data class LoginWithFacebookResp(val userId: Int?) {
+
+	fun toLoginResp(): LoginResp {
+		return LoginResp(null, null, null, null)
+	}
+
+}
 
 data class LoginUser(
 	val id: Int?,

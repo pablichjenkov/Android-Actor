@@ -4,7 +4,7 @@ import android.content.Context
 import com.esotericsoftware.minlog.Log
 import io.paperdb.Paper
 
-class StorageManager(appContext: Context) {
+class StorageManager(val appContext: Context) {
 
 	private val AppStorageDir = "Hamperapp-Storage"
 

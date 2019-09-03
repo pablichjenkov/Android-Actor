@@ -1,12 +1,11 @@
 package com.hamperapp.auth
 
+import com.facebook.AccessToken
 import com.hamperapp.*
+import com.hamperapp.common.OsUtil
 import com.hamperapp.network.http.Http
 import com.hamperapp.network.http.asFlow
-import com.hamperapp.network.http.doRequest
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import retrofit2.Call
 
 
@@ -23,7 +22,7 @@ class AuthManager(val storageManager: StorageManager) {
 	private var loginRespSnapshot: LoginResp? = null
 
 
-	fun doLogin(loginReq: LoginReq): Flow<LoginResp> = flow<LoginResp> {
+	fun doLogin(loginReq: LoginReq): Flow<LoginResp> {
 
 		lateinit var call: Call<LoginResp>
 
@@ -43,23 +42,69 @@ class AuthManager(val storageManager: StorageManager) {
 
 		}
 
-		doRequest(call)
-
-	}.onEach {
-
-		loginRespSnapshot = it
+		return call
+			.asFlow()
+			.onEach {
+				loginRespSnapshot = it
+			}
 
 	}
 
-	fun doSignup(signupReq: SignupReq): Flow<SignUpResp> = commonApi.signup(signupReq).asFlow()
+	fun verifyFBLogin(): Boolean {
+
+		val accessToken = AccessToken.getCurrentAccessToken()
+
+		return accessToken != null && !accessToken.isExpired
+
+	}
+
+	fun doLoginWithFacebookToken(): Flow<Boolean> {
+
+		val accessToken = AccessToken.getCurrentAccessToken()
+
+		val fbLogin = accessToken != null && !accessToken.isExpired
+
+		if (! fbLogin) {
+
+			return flowOf(false)
+
+		}
+
+		val deviceId = OsUtil.deviceId(storageManager.appContext)
+
+		val loginWithFacebookReq = LoginWithFacebookReq(
+			accessToken.token,
+			"not_ready",
+			deviceId)
+
+		return commonApi
+			.loginWithFacebookToken(loginWithFacebookReq)
+			.asFlow()
+			.onEach {
+
+				loginRespSnapshot = it.toLoginResp()
+
+			}.map {
+				true
+			}
+
+	}
+
+	fun doSignup(signupReq: SignupReq): Flow<SignUpResp> = commonApi
+		.signup(signupReq)
+		.asFlow()
+
+	fun authToken(): String? {
+
+		return loginRespSnapshot?.token
+
+	}
 
 	fun checkZipCode(zipCode: String): Flow<String> = flow {
 
 		//doRequest(commonApi.signup(signupReq))
 
 	}
-
-	fun authToken(): String = loginRespSnapshot?.token.orEmpty()
 
 	fun persistZipCode(zipCode: String) {
 
