@@ -1,5 +1,6 @@
 package com.hamperapp.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,12 +8,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.hamperapp.EmailLoginReq
-import com.hamperapp.LoginReq
 import com.hamperapp.R
 import kotlinx.android.synthetic.main.fragment_login.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.consumeEach
+import com.facebook.CallbackManager
+import com.facebook.login.LoginManager
 
 
 class LoginFragment : Fragment() {
@@ -21,6 +23,12 @@ class LoginFragment : Fragment() {
 
     private lateinit var actor: AuthPresenterActor
 
+    private var fbCallbackManager: CallbackManager? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fbCallbackManager = CallbackManager.Factory.create()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,6 +50,12 @@ class LoginFragment : Fragment() {
             )
 
             actor.send(AuthPresenterActor.InMsg.View.DoLogin(loginReq))
+
+        }
+
+        fbLoginBtn.setOnClickListener {
+
+            LoginManager.getInstance().logInWithReadPermissions(this, listOf(FB_EMAIL))
 
         }
 
@@ -88,6 +102,14 @@ class LoginFragment : Fragment() {
 
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        fbCallbackManager?.onActivityResult(requestCode, resultCode, data)
+
+        actor.send(AuthPresenterActor.InMsg.View.OnLoginFragmentResult)
+    }
+
     override fun onStop() {
         super.onStop()
 
@@ -96,7 +118,12 @@ class LoginFragment : Fragment() {
         fragmentCoroutineScope.coroutineContext.cancelChildren()
     }
 
+
     companion object {
+
+        private const val FB_EMAIL = "email"
+        private const val FB_USER_POSTS = "user_posts"
+        private const val FB_AUTH_TYPE = "rerequest"
 
         @JvmStatic
         fun newInstance(actor: AuthPresenterActor) =

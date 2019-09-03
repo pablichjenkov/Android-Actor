@@ -2,9 +2,14 @@ package com.hamperapp.launch
 
 import com.hamperapp.UIActorMsg
 import com.hamperapp.actor.Actor
+import com.hamperapp.network.http.Http
+import com.hamperapp.network.http.asFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -36,6 +41,8 @@ class SplashActor(
 
 	}
 
+    @ExperimentalCoroutinesApi
+    @InternalCoroutinesApi
     override fun onAction(inMsg: InMsg) {
 
         when (inMsg) {
@@ -44,7 +51,15 @@ class SplashActor(
 
                 scope.launch {
 
-					fragmentChannel.send(OutMsg.View.ShowZipInput)
+					//fragmentChannel.send(OutMsg.View.OnLoad)
+
+                    //delay(500)
+
+                    //fragmentChannel.send(OutMsg.View.OnLoadFinish)
+
+                    delay(500)
+
+                    parentChannel.send(OutMsg.OnSplashComplete)
 
                 }
 
@@ -52,28 +67,58 @@ class SplashActor(
 
             InMsg.View.OnViewStop -> {}
 
+            /*
             is InMsg.View.OnZipcodeEnter -> {
 
                 // TODO: Validate zipcode is covered by Hamper Service
                 // TODO: Save zipcode in local storage
-                inMsg.zipcode
 
                 scope.launch {
 
                     fragmentChannel.send(OutMsg.View.OnLoad)
 
-                    delay(2000)
+                    val commonApi = Http.provideCommonApi
 
-					fragmentChannel.send(OutMsg.View.OnSuccess)
 
-                    delay(500)
+                    commonApi
+                        .checkZipCode(
+                            "Bearer Empty"
+                            , inMsg.zipcode
+                        )
+                        .asFlow()
+                        .catch { throwable ->
 
-					parentChannel.send(OutMsg.OnSplashComplete)
+                            fragmentChannel.send(
+                                OutMsg.View.OnZipcodeError(throwable.message.orEmpty())
+                            )
+
+                        }
+                        .collect { zipcodeResp ->
+
+                            if (zipcodeResp.checked) {
+
+                                fragmentChannel.send(OutMsg.View.OnZipcodeSuccess)
+
+                                delay(500)
+
+                                parentChannel.send(OutMsg.OnSplashComplete)
+
+                            } else {
+
+                                fragmentChannel.send(
+                                    OutMsg.View.OnZipcodeError("This app is not available in your area")
+                                )
+
+                            }
+
+                        }
+
 
                 }
 
             }
 
+            */
         }
 
     }
@@ -96,7 +141,7 @@ class SplashActor(
 
             object OnViewStop : View()
 
-            class OnZipcodeEnter(val zipcode: String) : View()
+            //class OnZipcodeEnter(val zipcode: String) : View()
 
         }
 
@@ -109,13 +154,15 @@ class SplashActor(
 
         sealed class View : OutMsg() {
 
-            object ShowZipInput : View()
+            //object ShowZipInput : View()
 
             object OnLoad : View()
 
-            object OnSuccess : View()
+            object OnLoadFinish : View()
 
-            object OnError : View()
+            //object OnZipcodeSuccess : View()
+
+            //class OnZipcodeError(val message: String) : View()
 
         }
 

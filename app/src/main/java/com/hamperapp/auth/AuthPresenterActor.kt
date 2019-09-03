@@ -7,6 +7,9 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import androidx.core.content.ContextCompat.startActivity
+import android.content.Intent
+import com.facebook.AccessToken
 
 
 class AuthPresenterActor(
@@ -30,6 +33,9 @@ class AuthPresenterActor(
 
     override fun start() {
         super.start()
+
+        // If User is logged-in already, dispatch Auth Success and return
+        if (checkLoginBeforeAndDispatchResult()) { return }
 
         when (stage) {
 
@@ -55,6 +61,12 @@ class AuthPresenterActor(
             InMsg.View.ShowLogin -> { showLogin() }
 
             InMsg.View.OnLoginViewReady -> {}
+
+            InMsg.View.OnLoginFragmentResult -> {
+
+                checkLoginBeforeAndDispatchResult()
+
+            }
 
             is InMsg.View.DoLogin -> {
 
@@ -87,7 +99,11 @@ class AuthPresenterActor(
 
             InMsg.View.ShowSignUp -> { showSignup() }
 
-            InMsg.View.OnSignupViewReady -> {}
+            InMsg.View.OnSignupViewReady -> { }
+
+            InMsg.View.OnSignupFragmentResult -> {
+                checkLoginBeforeAndDispatchResult()
+            }
 
             is InMsg.View.DoSignUp -> {
 
@@ -120,6 +136,24 @@ class AuthPresenterActor(
 
         }
 
+    }
+
+    private fun checkLoginBeforeAndDispatchResult(): Boolean {
+
+        val accessToken = AccessToken.getCurrentAccessToken()
+
+        val isLoggedIn = accessToken != null && !accessToken.isExpired
+
+        if (isLoggedIn) {
+            scope.launch {
+                parentChannel.send(OutMsg.Login.AuthSuccess)
+            }
+
+            // User is logged-in with facebook we stop here
+            return true
+        }
+
+        return false
     }
 
     override fun back() {
@@ -215,6 +249,8 @@ class AuthPresenterActor(
 
             object OnLoginViewReady : View()
 
+            object OnLoginFragmentResult : View()
+
             object OnLoginViewStop : View()
 
             class DoLogin(val loginReq: LoginReq) : View()
@@ -222,6 +258,8 @@ class AuthPresenterActor(
             object ShowSignUp : View()
 
             object OnSignupViewReady : View()
+
+            object OnSignupFragmentResult : View()
 
             object OnSignupViewStop : View()
 

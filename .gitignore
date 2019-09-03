@@ -7,3 +7,4 @@
 /captures
 .externalNativeBuild
 app/src/main/assets/config.json
+app/src/main/res/values/strings_fb.xml

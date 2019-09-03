@@ -8,13 +8,6 @@ import retrofit2.http.*
 
 interface CommonApi {
 
-	@GET("zip-code/{zipCode}/check")
-	@Headers(
-		Http.Header_ContentType_ApplicationJson,
-		Http.Header_Accept_ApplicationJson
-	)
-	fun checkZipCode(@Path("zipCode") zipCode: String): Call<SignUpResp>
-
 	@POST("register")
 	@Headers(
 		Http.Header_ContentType_ApplicationJson,
@@ -43,7 +36,18 @@ interface CommonApi {
 	)
 	fun login(@Body emailLogin: UsernameLoginReq): Call<LoginResp>
 
+	@GET("zip-code/{zipCode}/check")
+	@Headers(
+		Http.Header_ContentType_ApplicationJson,
+		Http.Header_Accept_ApplicationJson
+	)
+	fun checkZipCode(
+		@Header(Http.Header_Authorization) authToken: String,
+		@Path("zipCode") zipCode: String
+	): Call<ZipcodeCheckResp>
+
 }
+
 
 //********************************************************************************************************************//
 //**************************************************** signup ********************************************************//
@@ -61,7 +65,7 @@ data class SignupReq (
 	//@SerializedName("request_id") val requestId : String? // request_id from /api/verify-phone/check response
 )
 
-data class AccessToken(
+data class HamperAccessToken(
 	val token: String?,
 	val expires: Long?
 )
@@ -75,7 +79,7 @@ data class SignupUser(
 )
 
 data class SignUpResp(
-	@SerializedName("access_token") val accessToken: AccessToken?,
+	@SerializedName("access_token") val accessToken: HamperAccessToken?,
 	@SerializedName("user") val signupUser: SignupUser?,
 	val zip: String?
 )
@@ -137,4 +141,12 @@ data class LoginUser(
 	@SerializedName("push_notification") val pushNotification: Boolean?,
 	@SerializedName("email_notification") val emailNotification: Boolean?,
 	@SerializedName("country_code") val countryCode: String?
+)
+
+//********************************************************************************************************************//
+//**************************************************** zipcode *******************************************************//
+//********************************************************************************************************************//
+
+data class ZipcodeCheckResp(
+	val checked: Boolean = false
 )

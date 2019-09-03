@@ -23,6 +23,7 @@ object Http {
 
 	const val Header_ContentType_ApplicationJson = "Content-Type: application/json"
 	const val Header_Accept_ApplicationJson = "Accept: application/json"
+	const val Header_Authorization = "Authorization"
 
 	val provideCommonApi by lazy<CommonApi> {
 

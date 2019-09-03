@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.input.input
@@ -40,18 +39,14 @@ class SplashFragment : Fragment() {
 
                 when (event) {
 
+                    /*
                     SplashActor.OutMsg.View.ShowZipInput -> {
 
                         MaterialDialog(requireContext()).show {
 
                             cancelOnTouchOutside(false)
 
-                            input(
-                                allowEmpty = true,
-                                hintRes = R.string.zipcode
-                            ) { dialog, text ->
-
-                                Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+                            input(allowEmpty = false, hintRes = R.string.zipcode) { dialog, text ->
 
                                 actor.send(
                                     SplashActor.InMsg.View.OnZipcodeEnter(text.toString())
@@ -60,9 +55,11 @@ class SplashFragment : Fragment() {
                             }
 
                             positiveButton(R.string.submit)
-                        }
+
+                        }//.window?.attributes?.windowAnimations
 
                     }
+                    */
 
                     SplashActor.OutMsg.View.OnLoad -> {
 
@@ -70,18 +67,28 @@ class SplashFragment : Fragment() {
 
                     }
 
-                    SplashActor.OutMsg.View.OnSuccess -> {
+                    SplashActor.OutMsg.View.OnLoadFinish -> {
 
                         progressBar.visibility = View.GONE
 
                     }
 
-                    SplashActor.OutMsg.View.OnError -> {
+                    /*(
+                    is SplashActor.OutMsg.View.OnZipcodeError -> {
 
                         progressBar.visibility = View.GONE
 
+                        MaterialDialog(requireContext()).show {
+
+                            title(text = "Error")
+
+                            message(text = event.message)
+
+                        }
+
                     }
 
+                    */
                 }
 
             }
